@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawaii Food Quiz Challenge! 🍰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fff0f5; /* Lavender blush background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        #game-container {
+            background-color: #ffffff;
+            padding: 1.5rem sm:2rem;
+            border-radius: 24px; /* More rounded */
+            box-shadow: 0 10px 25px rgba(255, 182, 193, 0.3); /* Softer pink shadow */
+            width: 100%;
+            max-width: 600px;
+            color: #5c5c7b; /* Dark lavender text */
+        }
+        .btn {
+            @apply py-3 px-6 rounded-xl shadow-md transition-all duration-200 ease-in-out font-bold text-white focus:outline-none focus:ring-2 focus:ring-opacity-50;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary {
+            @apply bg-pink-400 hover:bg-pink-500 focus:ring-pink-300;
+        }
+        .btn-secondary {
+            @apply bg-sky-300 hover:bg-sky-400 focus:ring-sky-200;
+        }
+        .btn-lifeline {
+            @apply bg-yellow-300 hover:bg-yellow-400 text-yellow-800 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed focus:ring-yellow-200;
+        }
+        .answer-btn {
+            @apply w-full md:w-auto bg-white border-2 text-lg py-3 px-4 rounded-xl shadow-sm transition-all duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed;
+            border-color: #cbd5e1; /* Light gray-blue border */
+            color: #4a5568; /* Slate text */
+        }
+        .answer-btn:hover:not(:disabled) {
+            border-color: #fbcfe8; /* Light pink border on hover */
+            background-color: #fff5f7; /* Very light pink bg on hover */
+        }
+        .answer-btn.correct {
+            @apply bg-green-300 border-green-400 text-green-800 font-semibold;
+        }
+        .answer-btn.incorrect {
+            @apply bg-red-300 border-red-400 text-red-800 font-semibold;
+        }
+        /* .answer-btn.ai-suggestion class is no longer needed */
+        #food-image {
+            max-height: 280px; 
+            object-fit: contain;
+            border-radius: 16px;
+        }
+        #loading-indicator .animate-spin { /* Original spinner */
+            border-bottom-color: #fb7185; 
+        }
+        h1, h2 {
+            color: #f472b6; /* Pink heading color */
+        }
+        #score-area span, #round-number, #total-rounds {
+            color: #ec4899; /* Stronger pink for score details */
+            font-weight: 700;
+        }
+        select {
+            border-radius: 12px !important;
+            padding: 0.75rem 1rem !important;
+            border-color: #e2e8f0 !important;
+            color: #4a5568;
+        }
+        select:focus {
+             border-color: #fbcfe8 !important;
+             box-shadow: 0 0 0 2px #fce7f3 !important; /* Light pink focus ring */
+        }
+        .pulsate {
+            animation: pulsate-kawaii 1.8s infinite ease-in-out;
+        }
+        @keyframes pulsate-kawaii {
+            0%, 100% { transform: scale(1); box-shadow: 0 6px 15px rgba(255, 182, 193, 0.2); }
+            50% { transform: scale(1.03); box-shadow: 0 10px 20px rgba(255, 182, 193, 0.4); }
+        }
+
+        /* Dancing veggies animation styles */
+        #dancing-veggies-container {
+            min-height: 100px; /* Ensure space for veggies */
+        }
+        .dancing-item {
+            display: inline-block; /* Allows them to sit nicely with flex */
+            font-size: 2rem; /* Default size, can be randomized by JS */
+            margin: 5px;
+        }
+        @keyframes dance-1 { /* Bounce */
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        @keyframes dance-2 { /* Sway */
+            0%, 100% { transform: translateX(0) rotate(-3deg); }
+            50% { transform: translateX(8px) rotate(3deg); }
+        }
+        @keyframes dance-3 { /* Gentle Spin and Bob */
+            0% { transform: rotate(0deg) translateY(0px); }
+            25% { transform: rotate(8deg) translateY(-4px); }
+            50% { transform: rotate(0deg) translateY(0px); }
+            75% { transform: rotate(-8deg) translateY(-4px); }
+            100% { transform: rotate(0deg) translateY(0px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+
+        <div id="setup-screen">
+            <h1 class="text-3xl sm:text-4xl font-extrabold mb-8 text-center">Food Quiz! 💖</h1>
+            <div class="mb-8">
+                <label for="property-select" class="block text-lg font-semibold text-pink-500 mb-2">What sweet secret shall we guess?</label>
+                <select id="property-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-lg">
+                    </select>
+            </div>
+            <button id="start-game-btn" class="btn btn-primary w-full text-xl pulsate">Let's Play! ✨</button>
+        </div>
+
+        <div id="game-screen" class="hidden">
+            <div id="score-area" class="flex justify-between items-center mb-4 text-lg">
+                <div>Score: <span id="score">0</span></div>
+                <div class="text-gray-600">Round: <span id="round-number">1</span>/<span id="total-rounds">5</span></div>
+            </div>
+
+            <div id="lifelines" class="flex justify-center space-x-2 sm:space-x-3 mb-6">
+                <button id="lifeline-5050" data-uses="1" class="btn btn-lifeline text-sm sm:text-base">✨ 50/50 ✨ (<span id="lifeline-5050-uses">1</span>)</button>
+                </div>
+
+            <div id="question-area" class="text-center mb-6">
+                <div class="w-full h-60 sm:h-72 flex items-center justify-center bg-pink-50 rounded-2xl mb-4 overflow-hidden p-2 shadow-inner">
+                    <img id="food-image" src="https://placehold.co/400x300/ffe4e6/fb7185?text=Yummy+Pic+Loading..." alt="Food item" class="max-w-full max-h-full object-contain">
+                </div>
+                <h2 id="food-name" class="text-2xl font-bold mb-1">Product Name</h2>
+                <p id="food-info" class="text-pink-400 mb-3">Values per 100g</p>
+                <p id="question-text" class="text-lg font-semibold text-gray-700">What is the value of X for this product?</p>
+            </div>
+
+            <div id="answer-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
+                </div>
+
+            <div id="feedback-area" class="text-center flex flex-col items-center">
+                <p id="feedback-text" class="text-xl font-bold mb-4 h-7"></p>
+                <button id="next-question-btn" class="btn btn-secondary w-auto hidden">Next Food</button>
+            </div>
+        </div>
+
+        <div id="end-screen" class="hidden text-center">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-pink-500 mb-4">Game Over! 🌟</h1>
+            <p class="text-2xl text-gray-700 mb-8">Your final score is: <span id="final-score" class="font-bold text-green-500">0</span> points!</p>
+            <button id="play-again-btn" class="btn btn-primary w-full sm:w-auto text-xl">Play Again? 💖</button>
+        </div>
+
+        <div id="loading-indicator" class="hidden text-center py-10">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-t-4 border-pink-400 mx-auto mb-4"></div>
+            <p class="text-xl text-pink-500 font-semibold mb-3">Fetching yummy facts...</p>
+            <div id="dancing-veggies-container" class="relative w-full mt-4 overflow-hidden flex flex-wrap justify-center items-center gap-2">
+                </div>
+        </div>
+        
+        <div id="error-message" class="hidden text-center p-4 bg-red-100 border-2 border-red-300 text-red-600 rounded-xl shadow-md">
+            <p id="error-text" class="font-semibold text-lg"></p>
+            <button id="retry-fetch-btn" class="btn bg-red-400 hover:bg-red-500 mt-4">Try Again? 🥺</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Configuration for the quiz
+        const QUIZ_CONFIG = {
+            totalRounds: 5,
+            apiPageSize: 50, // Fetch 50 products initially
+            fetchTimeout: 30000, 
+            properties: [
+                { id: 'calories', displayName: 'Calories (kcal per 100g)', dataPath: ['nutriments', 'energy-kcal_100g'], unit: 'kcal', valueType: 'integer', distractorParams: { type: 'numeric', minFactor: 0.4, maxFactor: 1.8, minAbsoluteDiff: 20, decimalPlaces: 0, minValue: 0 }},
+                { id: 'protein', displayName: 'Protein (g per 100g)', dataPath: ['nutriments', 'proteins_100g'], unit: 'g', valueType: 'float', distractorParams: { type: 'numeric', minFactor: 0.3, maxFactor: 2.0, minAbsoluteDiff: 0.5, decimalPlaces: 1, minValue: 0 }},
+                { id: 'carbs', displayName: 'Carbohydrates (g per 100g)', dataPath: ['nutriments', 'carbohydrates_100g'], unit: 'g', valueType: 'float', distractorParams: { type: 'numeric', minFactor: 0.3, maxFactor: 2.0, minAbsoluteDiff: 1, decimalPlaces: 1, minValue: 0 }},
+                { id: 'fat', displayName: 'Fat (g per 100g)', dataPath: ['nutriments', 'fat_100g'], unit: 'g', valueType: 'float', distractorParams: { type: 'numeric', minFactor: 0.3, maxFactor: 2.0, minAbsoluteDiff: 1, decimalPlaces: 1, minValue: 0 }},
+                { id: 'sugars', displayName: 'Sugars (g per 100g)', dataPath: ['nutriments', 'sugars_100g'], unit: 'g', valueType: 'float', distractorParams: { type: 'numeric', minFactor: 0.2, maxFactor: 2.5, minAbsoluteDiff: 0.5, decimalPlaces: 1, minValue: 0 }}
+            ]
+        };
+
+        // DOM Elements
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const dancingVeggiesContainer = document.getElementById('dancing-veggies-container');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const retryFetchBtn = document.getElementById('retry-fetch-btn');
+        const propertySelect = document.getElementById('property-select');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const scoreDisplay = document.getElementById('score');
+        const roundNumberDisplay = document.getElementById('round-number');
+        const totalRoundsDisplay = document.getElementById('total-rounds');
+        const lifeline5050Btn = document.getElementById('lifeline-5050');
+        // AI Guess button DOM element removed
+        const lifeline5050UsesDisplay = document.getElementById('lifeline-5050-uses');
+        // AI Guess uses display removed
+        const foodImage = document.getElementById('food-image');
+        const foodName = document.getElementById('food-name');
+        const foodInfo = document.getElementById('food-info');
+        const questionText = document.getElementById('question-text');
+        const answerOptionsContainer = document.getElementById('answer-options');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Game State
+        let masterProductList = []; 
+        let initialFetchDone = false; 
+        let currentScore = 0;
+        let currentRound = 0;
+        let selectedProperty = null;
+        let availableQuizProducts = []; 
+        let currentProduct = null;
+        let correctAnswer = null;
+        let answerButtons = [];
+        let lifeline5050Uses = 1;
+        // AI Guess uses variable removed
+
+        // Utility to get nested value
+        function getValueFromPath(obj, pathArray) {
+            return pathArray.reduce((currentObject, key) => (currentObject && typeof currentObject === 'object' && key in currentObject) ? currentObject[key] : undefined, obj);
+        }
+        
+        // Utility to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Dancing animation functions
+        function startDancingAnimation() {
+            dancingVeggiesContainer.innerHTML = ''; 
+            const emojis = ['🍓', '🥕', '🥦', '🍇', '🍉', '🍄', '🌽', '🥑', '🍊', '🍋', '🍌', '🍍', '🥭', '🍎', '🍏', '🍐', '🍑', '🍒', '🥝', '🍅', '🍆', '🥔'];
+            const animationTypes = ['dance-1', 'dance-2', 'dance-3'];
+            const numItems = Math.floor(Math.random() * 5) + 8; 
+
+            for (let i = 0; i < numItems; i++) {
+                const emojiSpan = document.createElement('span');
+                emojiSpan.classList.add('dancing-item');
+                emojiSpan.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                emojiSpan.style.fontSize = `${Math.random() * 1 + 1.5}rem`; 
+                emojiSpan.style.animationName = animationTypes[Math.floor(Math.random() * animationTypes.length)];
+                emojiSpan.style.animationDuration = `${Math.random() * 1.5 + 1.5}s`; 
+                emojiSpan.style.animationIterationCount = 'infinite';
+                emojiSpan.style.animationDirection = 'alternate';
+                emojiSpan.style.animationTimingFunction = 'ease-in-out';
+                emojiSpan.style.animationDelay = `${Math.random() * 0.5}s`; 
+                dancingVeggiesContainer.appendChild(emojiSpan);
+            }
+        }
+
+        function stopDancingAnimation() {
+            dancingVeggiesContainer.innerHTML = ''; 
+        }
+
+        // Show/hide loading indicator
+        function showLoading(isLoading) {
+            console.log('showLoading CALLED with:', isLoading);
+            if (isLoading) {
+                loadingIndicator.style.display = 'block';
+                startDancingAnimation();
+                startGameBtn.disabled = true; 
+            } else {
+                loadingIndicator.style.display = 'none';
+                stopDancingAnimation();
+                startGameBtn.disabled = false;
+            }
+        }
+        
+        // Show error message
+        function showError(message) {
+            console.log('showError CALLED with message:', message);
+            errorText.textContent = message;
+            errorMessage.style.display = 'block';
+            if (loadingIndicator.style.display === 'block') { 
+                showLoading(false);
+            }
+        }
+
+        // Initialize the game setup
+        function initGameSetup() {
+            console.log("initGameSetup: CALLED");
+            propertySelect.innerHTML = '';
+            QUIZ_CONFIG.properties.forEach(prop => {
+                const option = document.createElement('option');
+                option.value = prop.id;
+                option.textContent = prop.displayName;
+                propertySelect.appendChild(option);
+            });
+            totalRoundsDisplay.textContent = QUIZ_CONFIG.totalRounds;
+            
+            setupScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
+            endScreen.style.display = 'none';
+            if (loadingIndicator.style.display === 'block') showLoading(false); 
+            errorMessage.style.display = 'none';
+
+            currentScore = 0;
+            currentRound = 0;
+            selectedProperty = null;
+            availableQuizProducts = []; 
+            lifeline5050Uses = 1; 
+            // AI Guess state reset removed
+            updateLifelineDisplay(); 
+            startGameBtn.disabled = false; 
+        }
+
+        // Fetch products from Open Food Facts API (only once ideally)
+        async function fetchMasterProductList() {
+            console.log('fetchMasterProductList: CALLED');
+            showLoading(true);
+            errorMessage.style.display = 'none';
+            const fields = 'code,product_name_en,image_url,nutriments,quantity';
+            const countryTag = 'en:united-states';
+            const url = `https://world.openfoodfacts.org/cgi/search.pl?action=process&sort_by=unique_scans_n&page_size=${QUIZ_CONFIG.apiPageSize}&json=1&fields=${fields}&tagtype_0=states&tag_contains_0=contains&tag_0=en:nutrition-facts-completed&tagtype_1=states&tag_contains_1=contains&tag_1=en:photos-validated&tagtype_2=countries&tag_contains_2=contains&tag_2=${countryTag}&page=1`;
+            console.log('fetchMasterProductList: URL:', url);
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                console.log(`fetchMasterProductList: API request timed out after ${QUIZ_CONFIG.fetchTimeout}ms`);
+                controller.abort();
+            }, QUIZ_CONFIG.fetchTimeout);
+
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId); 
+                console.log('fetchMasterProductList: fetch call completed. Status:', response.status, response.statusText);
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.statusText} (Status: ${response.status})`);
+                }
+                
+                const data = await response.json();
+                console.log('fetchMasterProductList: JSON parsed. Products received:', data.products ? data.products.length : 'N/A');
+                
+                if (data.products && data.products.length > 0) {
+                    masterProductList = data.products.filter(p => p.image_url && p.product_name_en && p.product_name_en.trim() !== "");
+                    initialFetchDone = true;
+                    console.log(`fetchMasterProductList: Master list populated with ${masterProductList.length} generally valid products.`);
+                    return true; 
+                } else {
+                    console.log('fetchMasterProductList: No products found in API response for USA.');
+                    showError("No USA products found with the required data for the quiz. Please try again later.");
+                    return false; 
+                }
+            } catch (error) {
+                clearTimeout(timeoutId); 
+                if (error.name === 'AbortError') {
+                    console.error('fetchMasterProductList: CATCH AbortError (timeout).');
+                    showError(`Failed to fetch food data: The request timed out. Check your internet or try again.`);
+                } else {
+                    console.error('fetchMasterProductList: CATCH block error:', error);
+                    showError(`Failed to fetch food data: ${error.message}.`);
+                }
+                return false; 
+            } finally {
+                console.log('fetchMasterProductList: FINALLY block');
+                showLoading(false);
+            }
+        }
+
+        // Start the game
+        async function startGame() {
+            console.log('startGame: CALLED');
+            const selectedPropId = propertySelect.value;
+            selectedProperty = QUIZ_CONFIG.properties.find(p => p.id === selectedPropId);
+            if (!selectedProperty) {
+                showError("Please select a property to guess.");
+                return;
+            }
+            console.log('startGame: Selected property:', selectedProperty.displayName);
+
+            currentScore = 0;
+            currentRound = 0;
+            lifeline5050Uses = 1;
+            // AI Guess state reset removed
+            updateLifelineDisplay();
+            availableQuizProducts = []; 
+
+            setupScreen.style.display = 'none';
+            endScreen.style.display = 'none';
+
+            if (!initialFetchDone) {
+                const fetchSuccess = await fetchMasterProductList();
+                if (!fetchSuccess || masterProductList.length === 0) {
+                    initialFetchDone = false; 
+                    if (errorMessage.style.display === 'block') initGameSetup();
+                    return;
+                }
+            }
+            
+            let tempList = [...masterProductList];
+            shuffleArray(tempList);
+
+            for (const product of tempList) {
+                if (availableQuizProducts.length >= QUIZ_CONFIG.totalRounds) break;
+                const value = getValueFromPath(product, selectedProperty.dataPath);
+                if (value !== undefined && value !== null && String(value).trim() !== '') {
+                    if (!availableQuizProducts.find(p => p.code === product.code)) { 
+                         availableQuizProducts.push(product);
+                    }
+                }
+            }
+            
+            if (availableQuizProducts.length < QUIZ_CONFIG.totalRounds) {
+                console.log(`startGame: Not enough products in master list (${masterProductList.length}) for property '${selectedProperty.displayName}'. Needed ${QUIZ_CONFIG.totalRounds}, found ${availableQuizProducts.length}.`);
+                showError(`Sorry! We don't have enough yummy foods in our collection that fit the '${selectedProperty.displayName}' criteria for a full game right now. Try another category!`);
+                return;
+            }
+            
+            console.log(`startGame: proceeding to gameScreen. ${availableQuizProducts.length} products selected for this quiz.`);
+            gameScreen.style.display = 'block';
+            nextRound();
+            updateScoreDisplay();
+        }
+        
+        // Generate numeric distractors
+        function generateNumericDistractors(correctVal, params) {
+            const { minFactor, maxFactor, minAbsoluteDiff, decimalPlaces, minValue } = params;
+            let distractors = new Set();
+            const formattedCorrectValue = parseFloat(correctVal.toFixed(decimalPlaces));
+            const attempts = 30; 
+            for(let i=0; i < attempts && distractors.size < 3; i++) {
+                let distractor;
+                const type = Math.random();
+                if (formattedCorrectValue === 0 && (minValue === 0 || minValue === undefined)) { 
+                    distractor = (distractors.size + 1) * (minAbsoluteDiff || 1) * (Math.random() * 0.5 + 0.75);
+                } else if (type < 0.4) { 
+                    distractor = formattedCorrectValue * (Math.random() * (0.7 - minFactor) + minFactor);
+                } else if (type < 0.8) { 
+                    distractor = formattedCorrectValue * (Math.random() * (maxFactor - 1.3) + 1.3);
+                } else { 
+                    const offsetBase = Math.max(minAbsoluteDiff, formattedCorrectValue * 0.1); 
+                    const offset = (Math.random() * offsetBase * 2 + minAbsoluteDiff) * (Math.random() < 0.5 ? -1 : 1);
+                    distractor = formattedCorrectValue + offset;
+                }
+                distractor = Math.max(minValue === undefined ? 0 : minValue, distractor); 
+                let formattedDistractor = parseFloat(distractor.toFixed(decimalPlaces));
+                if (formattedDistractor !== formattedCorrectValue && !distractors.has(formattedDistractor) && Math.abs(formattedDistractor - formattedCorrectValue) >= (minAbsoluteDiff * 0.1)) {
+                    let sufficientlyDifferent = true;
+                    if (Math.abs(formattedDistractor - formattedCorrectValue) < minAbsoluteDiff * 0.5) { 
+                         sufficientlyDifferent = false;
+                    }
+                    for (const d of distractors) { 
+                        if (Math.abs(d - formattedDistractor) < minAbsoluteDiff * 0.3) {
+                            sufficientlyDifferent = false;
+                            break;
+                        }
+                    }
+                    if (sufficientlyDifferent) {
+                         distractors.add(formattedDistractor);
+                    }
+                }
+            }
+            while(distractors.size < 3) { 
+                let fallback = Math.abs(formattedCorrectValue + (Math.random() - 0.5) * 2 * Math.max(minAbsoluteDiff, 5) * (distractors.size + 2) );
+                fallback = Math.max(minValue === undefined ? 0 : minValue, fallback);
+                let formattedFallback = parseFloat(fallback.toFixed(decimalPlaces));
+                if(formattedFallback !== formattedCorrectValue && !distractors.has(formattedFallback) && Math.abs(formattedFallback - formattedCorrectValue) >= (minAbsoluteDiff * 0.1)) {
+                    distractors.add(formattedFallback);
+                } else { 
+                     let uniqueFallback = parseFloat((Math.random() * (formattedCorrectValue + 10) + Math.max(minAbsoluteDiff,1)).toFixed(decimalPlaces));
+                     if (uniqueFallback !== formattedCorrectValue && !distractors.has(uniqueFallback)) distractors.add(uniqueFallback);
+                     else distractors.add(parseFloat((uniqueFallback + Math.random()).toFixed(decimalPlaces))); 
+                }
+            }
+            return Array.from(distractors).slice(0,3);
+        }
+
+        // Load the next question or end game
+        function nextRound() { 
+            console.log("nextRound: CALLED. Current round:", currentRound + 1);
+            currentRound++; 
+            if (currentRound > QUIZ_CONFIG.totalRounds || availableQuizProducts.length === 0) {
+                if (currentRound <= QUIZ_CONFIG.totalRounds && availableQuizProducts.length === 0) {
+                    console.warn("nextRound: Ran out of availableQuizProducts unexpectedly.");
+                    showError("Oops! Something went wrong and we ran out of questions for this round.");
+                }
+                endGame();
+                return;
+            }
+            
+            currentProduct = availableQuizProducts.pop(); 
+            if (!currentProduct) { 
+                console.error("nextRound: Popped undefined product!");
+                showError("A little hiccup fetching the next question. Ending game.");
+                endGame();
+                return;
+            }
+
+            console.log("nextRound: Selected product:", currentProduct.product_name_en, currentProduct.code);
+            
+            const rawCorrectAnswer = getValueFromPath(currentProduct, selectedProperty.dataPath);
+            if (rawCorrectAnswer === undefined || rawCorrectAnswer === null || String(rawCorrectAnswer).trim() === '') { 
+                console.warn("nextRound: Product from quiz set is missing required data for the selected property, trying to get another if possible or skipping round.", currentProduct.product_name_en, "Value:", rawCorrectAnswer);
+                if(availableQuizProducts.length > 0) {
+                    nextRound(); 
+                } else {
+                    showError("A question had missing data. Ending game early.");
+                    endGame();
+                }
+                return;
+            }
+            
+            correctAnswer = selectedProperty.valueType === 'integer' ? parseInt(rawCorrectAnswer) : parseFloat(parseFloat(rawCorrectAnswer).toFixed(selectedProperty.distractorParams.decimalPlaces));
+            if (isNaN(correctAnswer)) {
+                console.warn("nextRound: Parsed correctAnswer is NaN, skipping product:", currentProduct.product_name_en, "Raw:", rawCorrectAnswer);
+                if(availableQuizProducts.length > 0) {
+                    nextRound(); 
+                } else {
+                    showError("A question had unreadable data. Ending game early.");
+                    endGame();
+                }
+                return;
+            }
+
+            roundNumberDisplay.textContent = currentRound;
+            foodName.textContent = currentProduct.product_name_en || 'A Mystery Treat!';
+            foodImage.src = currentProduct.image_url || 'https://placehold.co/400x300/ffe4e6/fb7185?text=No+Yummy+Pic';
+            foodImage.onerror = () => { foodImage.src = 'https://placehold.co/400x300/ffe4e6/fb7185?text=Pic+Error+🥺'; };
+            questionText.textContent = `How many ${selectedProperty.displayName.split('(')[0].trim()} in 100g of this?`;
+            foodInfo.textContent = `Values per 100g. Unit: ${selectedProperty.unit || ''}`;
+
+            const distractors = generateNumericDistractors(correctAnswer, selectedProperty.distractorParams);
+            let options = [...distractors, correctAnswer];
+            shuffleArray(options);
+
+            answerOptionsContainer.innerHTML = ''; 
+            answerButtons = [];
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('answer-btn');
+                button.textContent = `${option} ${selectedProperty.unit || ''}`;
+                button.dataset.value = option;
+                button.addEventListener('click', () => handleAnswer(button));
+                answerOptionsContainer.appendChild(button);
+                answerButtons.push(button);
+            });
+
+            feedbackText.textContent = '';
+            nextQuestionBtn.style.display = 'none';
+            enableAnswerButtons(true);
+            enableLifelines(true);
+            console.log("nextRound: Question displayed for product:", currentProduct.product_name_en);
+        }
+
+        // Handle user's answer
+        function handleAnswer(clickedButton) {
+            enableAnswerButtons(false); 
+            enableLifelines(false); 
+            const selectedValueString = clickedButton.dataset.value;
+            const selectedValue = parseFloat(selectedValueString); 
+            const isCorrect = selectedValue === correctAnswer;
+            if (isCorrect) {
+                currentScore += 10; 
+                clickedButton.classList.add('correct');
+                feedbackText.textContent = 'Super! Correct! 🎉';
+                feedbackText.className = 'text-xl font-bold mb-4 h-7 text-green-500';
+            } else {
+                clickedButton.classList.add('incorrect');
+                feedbackText.textContent = `Aww, the right answer was ${correctAnswer} ${selectedProperty.unit || ''}.`;
+                feedbackText.className = 'text-xl font-bold mb-4 h-7 text-red-500';
+                answerButtons.forEach(btn => {
+                    if (parseFloat(btn.dataset.value) === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            updateScoreDisplay();
+            nextQuestionBtn.style.display = 'block';
+        }
+
+        // Lifeline: 50/50
+        function useLifeline5050() {
+            if (lifeline5050Uses <= 0 || lifeline5050Btn.disabled) return;
+            console.log("useLifeline5050: CALLED");
+            lifeline5050Uses--;
+            updateLifelineDisplay();
+            lifeline5050Btn.disabled = true;
+            const incorrectButtons = answerButtons.filter(btn => parseFloat(btn.dataset.value) !== correctAnswer && !btn.disabled);
+            shuffleArray(incorrectButtons);
+            let buttonsToDisableCount = 0;
+            for(let i=0; i < incorrectButtons.length && buttonsToDisableCount < 2; i++){
+                incorrectButtons[i].disabled = true;
+                incorrectButtons[i].style.opacity = '0.5'; 
+                buttonsToDisableCount++;
+            }
+        }
+
+        // AI Guess lifeline function REMOVED
+        
+        function updateLifelineDisplay() {
+            lifeline5050UsesDisplay.textContent = lifeline5050Uses;
+            // AI Guess display update removed
+            lifeline5050Btn.disabled = lifeline5050Uses <= 0;
+            // AI Guess button disable logic removed
+        }
+
+        function enableAnswerButtons(enable) {
+            answerButtons.forEach(btn => {
+                if (enable) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1'; 
+                    btn.classList.remove('correct', 'incorrect'); // Removed 'ai-suggestion'
+                } else {
+                    btn.disabled = true;
+                }
+            });
+        }
+        
+        function enableLifelines(enable) {
+            if(enable) {
+                lifeline5050Btn.disabled = lifeline5050Uses <= 0; 
+                // AI Guess button enable logic removed
+            } else {
+                lifeline5050Btn.disabled = true;
+                // AI Guess button disable logic removed
+            }
+        }
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = currentScore;
+        }
+        function endGame() {
+            console.log("endGame: CALLED. Final score:", currentScore);
+            gameScreen.style.display = 'none';
+            endScreen.style.display = 'block';
+            finalScoreDisplay.textContent = currentScore;
+        }
+
+        // Event Listeners
+        startGameBtn.addEventListener('click', startGame);
+        nextQuestionBtn.addEventListener('click', nextRound);
+        playAgainBtn.addEventListener('click', () => {
+            console.log("playAgainBtn: CLICKED");
+            initGameSetup(); 
+        });
+        lifeline5050Btn.addEventListener('click', useLifeline5050);
+        // AI Guess button event listener removed
+        retryFetchBtn.addEventListener('click', () => {
+            console.log("retryFetchBtn: CLICKED");
+            errorMessage.style.display = 'none';
+            if (!initialFetchDone) { 
+                startGame(); 
+            } else if (setupScreen.style.display === 'block' || (gameScreen.style.display === 'none' && endScreen.style.display === 'none') ) {
+                 startGame(); 
+            } else { 
+                 console.warn("retryFetchBtn: Unhandled retry scenario. Game might be in an unexpected state.");
+                 initGameSetup(); 
+            }
+        });
+        
+        // Initialize
+        console.log("Document loaded, initializing game setup.");
+        initGameSetup();
+
+    </script>
+</body>
+</html>
