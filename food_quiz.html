@@ -179,7 +179,7 @@
         const QUIZ_CONFIG = {
             totalRounds: 5,
             apiPageSize: 50, // Fetch 50 products initially
-            fetchTimeout: 30000, 
+            fetchTimeout: 60000, 
             properties: [
                 { id: 'calories', displayName: 'Calories (kcal per 100g)', dataPath: ['nutriments', 'energy-kcal_100g'], unit: 'kcal', valueType: 'integer', distractorParams: { type: 'numeric', minFactor: 0.4, maxFactor: 1.8, minAbsoluteDiff: 20, decimalPlaces: 0, minValue: 0 }},
                 { id: 'protein', displayName: 'Protein (g per 100g)', dataPath: ['nutriments', 'proteins_100g'], unit: 'g', valueType: 'float', distractorParams: { type: 'numeric', minFactor: 0.3, maxFactor: 2.0, minAbsoluteDiff: 0.5, decimalPlaces: 1, minValue: 0 }},
