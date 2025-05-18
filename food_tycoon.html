@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Growth Simulator - Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none; 
+            background-color: #f3f4f6; 
+        }
+        .param-label { @apply block text-sm font-medium text-gray-700 mb-1; }
+        .param-input { @apply mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm; }
+        .sim-button { @apply px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150; }
+        #map { height: 350px; width: 100%; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
+        .chart-container { height: 200px; }
+        #simulationLog {
+            height: 120px; 
+            overflow-y: auto;
+            background-color: #fff; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 0.375rem; 
+            padding: 0.75rem; 
+            font-size: 0.875rem; 
+            line-height: 1.25rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+        }
+        .modal { @apply fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4; }
+        .modal-content { @apply bg-white p-6 rounded-lg shadow-xl w-full max-w-3xl mx-auto; } 
+        .modal-title { @apply text-2xl font-semibold text-indigo-700 mb-6; }
+        .investment-section { @apply mb-6 pb-6; }
+        .investment-section:not(:last-child) { @apply border-b border-gray-200; }
+
+        .investment-item label { @apply block text-sm font-medium text-gray-700; }
+        .investment-item input[type="number"], .investment-item select { @apply param-input w-auto inline-block; }
+        .param-section-title { @apply text-lg font-semibold text-indigo-600 mb-3 border-b border-indigo-200 pb-2; }
+        .section-header { @apply flex justify-between items-center mb-4; }
+        .toggle-button-params { @apply text-sm text-indigo-600 hover:text-indigo-800 focus:outline-none font-medium; } /* Specific for params toggle */
+        .profit-positive { @apply text-green-600 font-semibold; }
+        .profit-negative { @apply text-red-600 font-semibold; }
+        .dashboard-card { @apply bg-white p-4 rounded-lg shadow-md; }
+
+        @media (max-width: 768px) { 
+            #map { height: 280px; }
+            .chart-container { height: 170px; }
+            .modal-content { @apply max-w-lg p-4; } 
+            .main-grid { @apply grid-cols-1; } 
+            .main-grid > div:first-child { @apply md:col-span-1; } 
+            .main-grid > div:last-child { @apply md:col-span-1; } 
+            .header-controls { @apply flex-col items-end space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2; } 
+            .header-controls .sim-button { @apply w-full sm:w-auto text-center; }
+        }
+    </style>
+</head>
+<body class="p-2 sm:p-4">
+    <div class="container mx-auto max-w-screen-2xl"> 
+
+        <header class="bg-indigo-600 text-white p-4 rounded-t-lg shadow-lg flex justify-between items-center mb-6">
+            <h1 class="text-2xl sm:text-3xl font-bold">Restaurant Growth Game</h1>
+            <div id="game-controls-header" class="flex flex-wrap gap-2 header-controls">
+                <button id="startGameButton" class="sim-button bg-green-500 hover:bg-green-600 focus:ring-green-400">Start Game</button>
+                <button id="resetGameButton" class="sim-button bg-red-500 hover:bg-red-600 focus:ring-red-400">Reset Game</button>
+                <button id="toggleParamsButtonHeader" class="sim-button bg-gray-700 hover:bg-gray-800 focus:ring-gray-600">[Hide Params]</button>
+            </div>
+        </header>
+        
+        <section id="parameters-outer-section" class="mb-6 p-6 bg-indigo-50 rounded-lg shadow-lg">
+            <div class="section-header">
+                <h2 class="text-2xl font-semibold text-indigo-700">Base Simulation Parameters</h2>
+            </div>
+            <div id="controls-section" class="space-y-8"> 
+                <div>
+                    <h3 class="param-section-title">Initial Quality</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                        <div>
+                            <label for="foodQuality" class="param-label">Food (1-10):</label>
+                            <input type="number" id="foodQuality" class="param-input" value="7" min="1" max="10" step="0.1">
+                        </div>
+                        <div>
+                            <label for="appQuality" class="param-label">App (1-10):</label>
+                            <input type="number" id="appQuality" class="param-input" value="6" min="1" max="10" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="param-section-title">Revenue ($ per User/Week or Visit)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                        <div>
+                            <label for="revenuePerUser_heavy" class="param-label">Heavy User/Wk:</label>
+                            <input type="number" id="revenuePerUser_heavy" class="param-input" value="10" min="0">
+                        </div>
+                         <div>
+                            <label for="revenuePerUser_sporadic" class="param-label">Sporadic User/Wk:</label>
+                            <input type="number" id="revenuePerUser_sporadic" class="param-input" value="4" min="0">
+                        </div>
+                         <div>
+                            <label for="revenuePerUser_chance" class="param-label">Chance User/Visit:</label>
+                            <input type="number" id="revenuePerUser_chance" class="param-input" value="8" min="0">
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="param-section-title">Costs & Initial Marketing ($)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                        <div>
+                            <label for="initialCash" class="param-label">Initial Cash ($):</label>
+                            <input type="number" id="initialCash" class="param-input" value="100000" min="0">
+                        </div>
+                        <div>
+                            <label for="opCostRestaurant" class="param-label">Weekly Op.Cost/Restaurant:</label>
+                            <input type="number" id="opCostRestaurant" class="param-input" value="2000" min="0">
+                        </div>
+                        <div>
+                            <label for="openingCost" class="param-label">Restaurant Opening:</label>
+                            <input type="number" id="openingCost" class="param-input" value="50000" min="0">
+                        </div>
+                        <div>
+                            <label for="initialMarketingBudget" class="param-label">Initial Mktg Spend/Restaurant:</label>
+                            <input type="number" id="initialMarketingBudget" class="param-input" value="7500" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="param-section-title">User Dynamics (Base % / Week)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                        <div>
+                            <label for="convertChanceToSporadicRate" class="param-label">C→S Convert Rate:</label>
+                            <input type="number" id="convertChanceToSporadicRate" class="param-input" value="1.2" min="0" max="100" step="0.1">
+                        </div>
+                        <div>
+                            <label for="convertSporadicToHeavyRate" class="param-label">S→H Convert Rate:</label>
+                            <input type="number" id="convertSporadicToHeavyRate" class="param-input" value="0.5" min="0" max="100" step="0.1">
+                        </div>
+                        <div>
+                            <label for="convertChanceToHeavyRate" class="param-label">C→H (HighQ) Rate:</label>
+                            <input type="number" id="convertChanceToHeavyRate" class="param-input" value="0.25" min="0" max="100" step="0.1">
+                        </div>
+                        <div>
+                            <label for="churnChanceRate" class="param-label">Churn Chance Users:</label>
+                            <input type="number" id="churnChanceRate" class="param-input" value="2.0" min="0" max="100" step="0.1">
+                        </div>
+                        <div>
+                            <label for="churnSporadicRate" class="param-label">Churn Sporadic Users:</label>
+                            <input type="number" id="churnSporadicRate" class="param-input" value="1.0" min="0" max="100" step="0.1">
+                        </div>
+                         <div>
+                            <label for="churnHeavyRate" class="param-label">Churn Heavy Users:</label>
+                            <input type="number" id="churnHeavyRate" class="param-input" value="0.5" min="0" max="100" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 main-grid mb-6">
+            <div class="md:col-span-2 space-y-6">
+                <section id="game-status-section" class="dashboard-card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-3">Game Status</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 text-center">
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-500">Current Date</p>
+                            <p id="currentDate" class="text-md sm:text-lg font-semibold text-indigo-600">Year 1, Month 1 (Week 1)</p>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-500">Restaurants</p>
+                            <p id="totalRestaurants" class="text-md sm:text-lg font-semibold text-indigo-600">0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-500">Total Profit</p>
+                            <p id="totalProfit" class="text-md sm:text-lg font-semibold text-indigo-600">$0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-500">Total Users</p>
+                            <p id="totalUsers" class="text-md sm:text-lg font-semibold text-purple-600">0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-500">Chance Users</p>
+                            <p id="totalChanceUsers" class="text-md sm:text-lg font-semibold text-blue-600">0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-500">Sporadic Users</p>
+                            <p id="totalSporadicUsers" class="text-md sm:text-lg font-semibold text-yellow-600">0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-500">Heavy Users</p>
+                            <p id="totalHeavyUsers" class="text-md sm:text-lg font-semibold text-green-600">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="map-section" class="dashboard-card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-3">Restaurant Locations</h2>
+                    <div id="map"></div>
+                </section>
+            </div>
+
+            <div class="space-y-6">
+                <section id="charts-users-section" class="dashboard-card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-3">User Types Over Time</h2>
+                    <div class="chart-container">
+                        <canvas id="usersChart"></canvas> 
+                    </div>
+                </section>
+                <section id="charts-profit-section" class="dashboard-card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-3">Total Profit Over Time</h2>
+                    <div class="chart-container">
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                </section>
+                <section id="log-section" class="dashboard-card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-3">Event Log</h2>
+                    <div id="simulationLog">Welcome to the Restaurant Growth Game! Press Start.</div>
+                </section>
+            </div>
+        </div>
+        
+        <div id="investmentModal" class="modal hidden">
+            <div class="modal-content">
+                <h3 class="modal-title">Monthly Investment Decisions - <span id="modalDate"></span></h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="investment-section">
+                            <h4 class="text-lg font-medium text-gray-800 mb-3">Global Investments</h4>
+                            <div class="investment-item mb-3">
+                                <label for="investAppRND">App R&D (Cost: $10k, +0.5 AppQ) - Press 'A'</label>
+                                <input type="checkbox" id="investAppRND" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 ml-2">
+                            </div>
+                            <div class="investment-item">
+                                <label for="investGlobalMarketing">Global Marketing (Cost: $20k, User Boost) - Press 'G'</label>
+                                <input type="checkbox" id="investGlobalMarketing" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 ml-2">
+                            </div>
+                        </div>
+        
+                        <div class="investment-section">
+                            <h4 class="text-lg font-medium text-gray-800 mb-3">New Restaurant Expansion</h4>
+                            <div class="investment-item">
+                                <label for="expansionCitySelect">Expand to (Cost: $<span id="expansionOpeningCost"></span>) - Press 'E' for 1st</label>
+                                <select id="expansionCitySelect" class="param-input mt-1 w-full">
+                                    <option value="">-- Select a City --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="investment-section">
+                        <h4 class="text-lg font-medium text-gray-800 mb-3">Per-Restaurant Investments & Performance</h4>
+                        <div id="restaurantInvestmentsList" class="max-h-80 overflow-y-auto space-y-3 pr-2"> 
+                            <p class="text-sm text-gray-500">No open restaurants to invest in yet.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end gap-3">
+                    <button id="jumpYearButtonModal" class="sim-button bg-purple-600 hover:bg-purple-700 focus:ring-purple-500">Jump 1 Year (M)</button>
+                    <button id="confirmInvestmentsButton" class="sim-button bg-green-600 hover:bg-green-700 focus:ring-green-500">Confirm & Proceed to Next Month (N)</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="messageBox" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-md shadow-lg z-50 text-center">
+            <p id="messageText"></p>
+            <button id="closeMessageButton" class="mt-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-sm">OK</button>
+        </div>
+
+        <footer class="text-center text-sm text-gray-500 py-8 border-t border-gray-200 mt-8">
+            <p><strong>Restaurant Growth Simulator Game:</strong> Manage your restaurant empire by making strategic monthly investments in marketing, quality, and expansion. Monitor your user base (Chance, Sporadic, Heavy) and overall profit to become a tycoon!</p>
+            <p class="mt-2"><strong>Keyboard Shortcuts (Investment Modal):</strong> 'N' = Proceed | 'M' = Jump Year | 'A' = App R&D | 'G' = Global Marketing | 'E' = Select 1st Expansion City.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- Global Game Variables & Configuration ---
+        let map;
+        let usersChartInstance, profitChartInstance;
+        
+        let gameRunning = false; 
+        let simulationPausedForInvestment = false; 
+        let jumpingYear = false; 
+
+        let currentYear = 1;
+        let currentMonth = 1; 
+        let currentGlobalWeek = 1; 
+        const WEEKS_PER_MONTH = 4;
+        const MONTHS_PER_YEAR = 12;
+
+        let restaurants = [];
+        let totalCompanyProfit = 0; 
+        let totalChanceUsersGlobal = 0;
+        let totalSporadicUsersGlobal = 0;
+        let totalHeavyUsersGlobal = 0;
+
+        let globalAppQuality = 6; 
+        let globalFoodQualityBaseline = 7; 
+
+        let chartLabels = []; 
+        let chanceUsersData = []; 
+        let sporadicUsersData = []; 
+        let heavyUsersData = []; 
+        let profitData = []; 
+        
+        let nextRestaurantId = 0;
+
+        let globalMarketingBoostActive = false;
+        let globalMarketingBoostWeeksRemaining = 0;
+        let localMarketingBoosts = {}; 
+
+        const initialRestaurantData = [
+            { name: "New York City, NY", lat: 40.7128, lng: -74.0060, openingGlobalWeek: 1 } 
+        ];
+
+        const basePotentialExpansionCities = [
+            { name: "Miami, FL", lat: 25.7617, lng: -80.1918},
+            { name: "Austin, TX", lat: 30.2672, lng: -97.7431},
+            { name: "Los Angeles, CA", lat: 34.0522, lng: -118.2437 }, { name: "Chicago, IL", lat: 41.8781, lng: -87.6298 },
+            { name: "Houston, TX", lat: 29.7604, lng: -95.3698 }, { name: "Phoenix, AZ", lat: 33.4484, lng: -112.0740 },
+            { name: "Philadelphia, PA", lat: 39.9526, lng: -75.1652 }, { name: "San Francisco, CA", lat: 37.7749, lng: -122.4194 },
+            { name: "Seattle, WA", lat: 47.6062, lng: -122.3321 }, { name: "Boston, MA", lat: 42.3601, lng: -71.0589 },
+            { name: "Dallas, TX", lat: 32.7767, lng: -96.7970 }, { name: "Denver, CO", lat: 39.7392, lng: -104.9903 },
+            { name: "Atlanta, GA", lat: 33.7490, lng: -84.3880 }
+        ];
+        let availableExpansionCities = [...basePotentialExpansionCities]; 
+
+        // --- DOM Elements ---
+        const foodQualityEl = document.getElementById('foodQuality');
+        const appQualityEl = document.getElementById('appQuality');
+        const revenuePerUserHeavyEl = document.getElementById('revenuePerUser_heavy');
+        const revenuePerUserSporadicEl = document.getElementById('revenuePerUser_sporadic');
+        const revenuePerUserChanceEl = document.getElementById('revenuePerUser_chance');
+        const initialCashEl = document.getElementById('initialCash'); 
+        const opCostRestaurantEl = document.getElementById('opCostRestaurant');
+        const openingCostEl = document.getElementById('openingCost'); 
+        const initialMarketingBudgetEl = document.getElementById('initialMarketingBudget');
+        const convertChanceToSporadicRateEl = document.getElementById('convertChanceToSporadicRate');
+        const convertSporadicToHeavyRateEl = document.getElementById('convertSporadicToHeavyRate');
+        const convertChanceToHeavyRateEl = document.getElementById('convertChanceToHeavyRate'); 
+        const churnChanceRateEl = document.getElementById('churnChanceRate');
+        const churnSporadicRateEl = document.getElementById('churnSporadicRate');
+        const churnHeavyRateEl = document.getElementById('churnHeavyRate');
+
+        const parametersOuterSectionEl = document.getElementById('parameters-outer-section');
+        const controlsSectionEl = document.getElementById('controls-section'); 
+        const toggleParamsButtonHeaderEl = document.getElementById('toggleParamsButtonHeader');
+
+
+        const startGameButton = document.getElementById('startGameButton');
+        const jumpYearButtonModalEl = document.getElementById('jumpYearButtonModal'); 
+        const resetGameButton = document.getElementById('resetGameButton');
+
+        const currentDateEl = document.getElementById('currentDate');
+        const totalRestaurantsEl = document.getElementById('totalRestaurants');
+        const totalUsersEl = document.getElementById('totalUsers'); 
+        const totalChanceUsersEl = document.getElementById('totalChanceUsers');
+        const totalSporadicUsersEl = document.getElementById('totalSporadicUsers');
+        const totalHeavyUsersEl = document.getElementById('totalHeavyUsers');
+        const totalProfitEl = document.getElementById('totalProfit');
+        const simulationLogEl = document.getElementById('simulationLog');
+        
+        const investmentModal = document.getElementById('investmentModal');
+        const modalDateEl = document.getElementById('modalDate');
+        const confirmInvestmentsButton = document.getElementById('confirmInvestmentsButton');
+        const restaurantInvestmentsListEl = document.getElementById('restaurantInvestmentsList');
+        const investAppRNDEl = document.getElementById('investAppRND');
+        const investGlobalMarketingEl = document.getElementById('investGlobalMarketing');
+        const expansionCitySelectEl = document.getElementById('expansionCitySelect');
+        const expansionOpeningCostEl = document.getElementById('expansionOpeningCost');
+        
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const closeMessageButton = document.getElementById('closeMessageButton');
+
+
+        // --- Initialization ---
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: true, 
+                scrollWheelZoom: false, 
+                doubleClickZoom: false, 
+                dragging: true, // Enable dragging
+                touchZoom: true, // Enable touch zoom
+                boxZoom: false, 
+                keyboard: true // Enable keyboard navigation for map
+            }).setView([39.8283, -98.5795], 3.5); 
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                noWrap: true 
+            }).addTo(map);
+            map.setMinZoom(3); // Allow zooming out a bit more if needed
+        }
+
+        function initCharts() {
+            const userChartCtx = document.getElementById('usersChart').getContext('2d');
+            usersChartInstance = new Chart(userChartCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Chance Users', data: [], borderColor: 'rgb(59, 130, 246)', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.1, fill: false },
+                        { label: 'Sporadic Users', data: [], borderColor: 'rgb(245, 158, 11)', backgroundColor: 'rgba(245, 158, 11, 0.1)', tension: 0.1, fill: false },
+                        { label: 'Heavy Users', data: [], borderColor: 'rgb(16, 185, 129)', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.1, fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { title: { display: true, text: 'Time (Year, Month)' } },  y: { beginAtZero: true, title: {display: true, text: 'Number of Users'}, stacked: false } },
+                    animation: { duration: 200 }
+                }
+            });
+
+            const profitChartCtx = document.getElementById('profitChart').getContext('2d');
+            profitChartInstance = new Chart(profitChartCtx, {
+                type: 'line', 
+                data: { labels: [], datasets: [{ label: 'Total Profit ($)', data: [], borderColor: 'rgb(236, 72, 153)', tension: 0.1 }] }, 
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { title: { display: true, text: 'Time (Year, Month)' } }, y: { beginAtZero: true, title: {display: true, text: 'Profit in USD'} } },
+                    animation: { duration: 200 }
+                }
+            });
+        }
+        
+        function showMessage(message) { messageText.textContent = message; messageBox.classList.remove('hidden'); }
+        closeMessageButton.addEventListener('click', () => messageBox.classList.add('hidden'));
+
+        // --- Core Game Loop ---
+        function runSingleMonthSimulation(isSkippingInvestmentModal = false) {
+            if (!gameRunning && !isSkippingInvestmentModal) return;
+            if (simulationPausedForInvestment && !isSkippingInvestmentModal) return;
+
+            if(!isSkippingInvestmentModal) logEvent(`Simulating Y${currentYear}M${currentMonth}...`, true, "SIM_FLOW"); 
+
+            const params = getParameters(); 
+            
+            for (let weekInMonth = 1; weekInMonth <= WEEKS_PER_MONTH; weekInMonth++) {
+                initialRestaurantData.forEach(data => {
+                    if (data.openingGlobalWeek === currentGlobalWeek && !restaurants.find(r => r.name === data.name)) {
+                        openNewRestaurant(data.name, data.lat, data.lng, params);
+                    }
+                });
+
+                let currentWeekCompanyProfitContribution = 0;
+
+                restaurants.forEach(r => {
+                    r.ageInWeeks++;
+                    
+                    let newChanceUsersThisWeek = 0;
+                    if (r.ageInWeeks <= WEEKS_PER_MONTH) { 
+                        newChanceUsersThisWeek += (params.initialMarketingBudget / WEEKS_PER_MONTH) / 2; 
+                    }
+                    if (r.ageInWeeks <= 12 || r.popularity < 30) {
+                         newChanceUsersThisWeek += Math.max(1, params.initialMarketingBudget / 200); 
+                    }
+                    let reputationFactor = (r.popularity / 100) * (r.foodQuality / 10);
+                    newChanceUsersThisWeek += reputationFactor * 2.5; 
+                    
+                    let appPlatformGrowthRate = (globalAppQuality / 1000); 
+                    let foodQualityAmplifier = (1 + r.foodQuality / 20);
+                    newChanceUsersThisWeek += (r.chanceUsers + r.sporadicUsers) * appPlatformGrowthRate * foodQualityAmplifier * 0.25;
+
+                    if(globalMarketingBoostActive && globalMarketingBoostWeeksRemaining > 0) {
+                        newChanceUsersThisWeek *= 1.5; 
+                    }
+                    if(localMarketingBoosts[r.id] && localMarketingBoosts[r.id] > 0) {
+                        newChanceUsersThisWeek *= 1.3; 
+                        localMarketingBoosts[r.id]--; 
+                        if(localMarketingBoosts[r.id] <= 0) {
+                            delete localMarketingBoosts[r.id];
+                            logEvent(`Local marketing for ${r.name} ended.`, true, "MKTG_END");
+                        }
+                    }
+
+                    r.chanceUsers += Math.round(Math.max(0, newChanceUsersThisWeek));
+
+                    // User Conversion
+                    let baseChanceToSporadic = params.convertChanceToSporadicRate / 100.0; 
+                    let convertsToSporadic = r.chanceUsers * baseChanceToSporadic * (r.foodQuality / 7); 
+                    r.chanceUsers -= convertsToSporadic;
+                    r.sporadicUsers += convertsToSporadic;
+
+                    let baseSporadicToHeavy = params.convertSporadicToHeavyRate / 100.0;
+                    let convertsToHeavy = r.sporadicUsers * baseSporadicToHeavy * ((r.foodQuality + globalAppQuality) / 14); 
+                    r.sporadicUsers -= convertsToHeavy;
+                    r.heavyUsers += convertsToHeavy;
+
+                    const qualityThresholdForDirectHeavy = 7; 
+                    if (r.foodQuality >= qualityThresholdForDirectHeavy && globalAppQuality >= qualityThresholdForDirectHeavy) {
+                        let baseChanceToHeavyDirect = params.convertChanceToHeavyRate / 100.0;
+                        let convertsChanceToHeavyDirect = r.chanceUsers * baseChanceToHeavyDirect * ((r.foodQuality + globalAppQuality) / 16); 
+                        convertsChanceToHeavyDirect = Math.min(r.chanceUsers, convertsChanceToHeavyDirect); 
+                        r.chanceUsers -= convertsChanceToHeavyDirect;
+                        r.heavyUsers += convertsChanceToHeavyDirect;
+                    }
+                    
+                    r.chanceUsers   *= (1 - (params.churnChanceRate / 100.0 + (10 - r.foodQuality) * 0.0005)); 
+                    r.sporadicUsers *= (1 - (params.churnSporadicRate / 100.0 + (10 - r.foodQuality) * 0.0002 + (10-globalAppQuality) * 0.0002));
+                    r.heavyUsers    *= (1 - (params.churnHeavyRate / 100.0 + (10 - r.foodQuality) * 0.0001 + (10-globalAppQuality) * 0.0001));
+
+                    ['chanceUsers', 'sporadicUsers', 'heavyUsers'].forEach(type => r[type] = Math.max(0, Math.round(r[type])) );
+
+                    let totalRestaurantUsers = r.chanceUsers + r.sporadicUsers + r.heavyUsers;
+                    r.popularity = (r.foodQuality + globalAppQuality) * 3 + (totalRestaurantUsers / 200); 
+                    r.popularity = Math.min(100, Math.max(0, r.popularity));
+
+                    const weeklyRevenue = (r.heavyUsers * params.revenuePerUser_heavy) + 
+                                          (r.sporadicUsers * params.revenuePerUser_sporadic) +
+                                          (newChanceUsersThisWeek * params.revenuePerUser_chance); 
+                    r.lastWeeklyRevenue = weeklyRevenue; 
+                    r.lastWeeklyOperatingCost = params.opCostRestaurant; 
+                    r.weeklyProfit = weeklyRevenue - params.opCostRestaurant;
+                    r.lastWeeklyProfit = r.weeklyProfit; 
+                    
+                    r.totalProfit += r.weeklyProfit; 
+                    currentWeekCompanyProfitContribution += r.weeklyProfit;
+                });
+
+                totalCompanyProfit += currentWeekCompanyProfitContribution;
+                
+                if (globalMarketingBoostActive) { 
+                    globalMarketingBoostWeeksRemaining--;
+                    if(globalMarketingBoostWeeksRemaining <=0) {
+                        globalMarketingBoostActive = false;
+                        logEvent("Global marketing campaign ended.", true, "MKTG_END");
+                    }
+                }
+                currentGlobalWeek++; 
+            } 
+
+            updateGlobalUserTotals(); 
+            updateUI(); 
+            
+            if (!isSkippingInvestmentModal) {
+                simulationPausedForInvestment = true;
+                jumpYearButtonModalEl.disabled = false; 
+                populateInvestmentModal();
+                investmentModal.classList.remove('hidden');
+                logEvent(`Month Y${currentYear}M${currentMonth} ended. Make investment decisions.`, true, "SIM_FLOW");
+            }
+        }
+
+        async function jumpOneYear() {
+            if (!gameRunning || jumpingYear) return; 
+            if (!simulationPausedForInvestment && investmentModal.classList.contains('hidden')) {
+                showMessage("Cannot jump year while simulation is actively running mid-month. Wait for month end.");
+                return;
+            }
+
+            jumpingYear = true;
+            jumpYearButtonModalEl.disabled = true;
+            confirmInvestmentsButton.disabled = true; 
+            
+            // Apply investments from the current modal for the *first* month of the jump
+            logEvent("Jumping forward 1 year. Applying current investments for the first month of the jump...", true, "GAME_EVENT");
+            handleConfirmInvestments(true); // Pass true to indicate it's part of a jump and should not re-run simulation immediately
+
+            // Simulate the remaining 11 months
+            for (let i = 0; i < MONTHS_PER_YEAR -1; i++) { 
+                currentMonth++; 
+                if (currentMonth > MONTHS_PER_YEAR) {
+                    currentMonth = 1;
+                    currentYear++;
+                }
+                logEvent(`Simulating (Jump) Y${currentYear}M${currentMonth}...`, true, "SIM_FLOW");
+                runSingleMonthSimulation(true); 
+            }
+
+            jumpingYear = false;
+            confirmInvestmentsButton.disabled = false; 
+            logEvent("Year jump complete. Make investments for the new month.", true, "GAME_EVENT");
+
+            // Advance to the next month *after* the jump is complete before showing modal
+            currentMonth++;
+            if (currentMonth > MONTHS_PER_YEAR) {
+                currentMonth = 1;
+                currentYear++;
+            }
+
+            simulationPausedForInvestment = true; 
+            populateInvestmentModal(); 
+            investmentModal.classList.remove('hidden');
+        }
+        
+        function updateGlobalUserTotals() {
+            totalChanceUsersGlobal = 0;
+            totalSporadicUsersGlobal = 0;
+            totalHeavyUsersGlobal = 0;
+            restaurants.forEach(r => {
+                totalChanceUsersGlobal += r.chanceUsers;
+                totalSporadicUsersGlobal += r.sporadicUsers;
+                totalHeavyUsersGlobal += r.heavyUsers;
+            });
+        }
+
+        function openNewRestaurant(name, lat, lng, params) {
+            const newRestaurant = {
+                id: nextRestaurantId++, name, lat, lng,
+                openingYear: currentYear, openingMonth: currentMonth, openingGlobalWeek: currentGlobalWeek,
+                chanceUsers: 0, sporadicUsers: 0, heavyUsers: 0,
+                weeklyProfit: 0, totalProfit: 0, ageInWeeks: 0, marker: null,
+                foodQuality: globalFoodQualityBaseline, 
+                popularity: 10,
+                lastWeeklyRevenue: 0, lastWeeklyOperatingCost: 0, lastWeeklyProfit: 0 
+            };
+            restaurants.push(newRestaurant);
+            newRestaurant.marker = L.circleMarker([lat, lng], {
+                radius: 5, fillColor: "#4F46E5", color: "#3730A3", weight: 1, opacity: 1, fillOpacity: 0.7
+            }).addTo(map);
+            
+            newRestaurant.marker.bindTooltip(`${name}<br>C:0 S:0 H:0<br>FoodQ: ${newRestaurant.foodQuality.toFixed(1)} Pop: ${newRestaurant.popularity}`);
+            logEvent(`OPENED ${name} in Y${currentYear}M${currentMonth}. Initial Mktg: $${params.initialMarketingBudget.toLocaleString()}`, true, "RESTAURANT_EVENT");
+        }
+
+        function getParameters() {
+            return {
+                foodQuality: parseFloat(foodQualityEl.value), 
+                appQuality: parseFloat(appQualityEl.value),   
+                revenuePerUser_heavy: parseFloat(revenuePerUserHeavyEl.value),
+                revenuePerUser_sporadic: parseFloat(revenuePerUserSporadicEl.value),
+                revenuePerUser_chance: parseFloat(revenuePerUserChanceEl.value),
+                initialCash: parseFloat(initialCashEl.value), 
+                opCostRestaurant: parseFloat(opCostRestaurantEl.value),
+                openingCost: parseFloat(openingCostEl.value), 
+                initialMarketingBudget: parseFloat(initialMarketingBudgetEl.value), 
+                convertChanceToSporadicRate: parseFloat(convertChanceToSporadicRateEl.value),
+                convertSporadicToHeavyRate: parseFloat(convertSporadicToHeavyRateEl.value),
+                convertChanceToHeavyRate: parseFloat(convertChanceToHeavyRateEl.value), 
+                churnChanceRate: parseFloat(churnChanceRateEl.value),
+                churnSporadicRate: parseFloat(churnSporadicRateEl.value),
+                churnHeavyRate: parseFloat(churnHeavyRateEl.value),
+            };
+        }
+
+        function updateUI() {
+            currentDateEl.textContent = `Y${currentYear}, M${currentMonth} (End of Week ${currentGlobalWeek-1})`;
+            totalRestaurantsEl.textContent = restaurants.length;
+            
+            totalChanceUsersEl.textContent = Math.round(totalChanceUsersGlobal).toLocaleString();
+            totalSporadicUsersEl.textContent = Math.round(totalSporadicUsersGlobal).toLocaleString();
+            totalHeavyUsersEl.textContent = Math.round(totalHeavyUsersGlobal).toLocaleString();
+            totalUsersEl.textContent = Math.round(totalChanceUsersGlobal + totalSporadicUsersGlobal + totalHeavyUsersGlobal).toLocaleString(); 
+            
+            totalProfitEl.textContent = `$${Math.round(totalCompanyProfit).toLocaleString()}`;
+
+            restaurants.forEach(r => {
+                if (r.marker) {
+                    const totalRestaurantUsers = r.chanceUsers + r.sporadicUsers + r.heavyUsers;
+                    const radius = Math.max(5, Math.min(30, Math.sqrt(totalRestaurantUsers) / 3 + 2)); 
+                    r.marker.setRadius(radius);
+                    r.marker.setTooltipContent(`${r.name}<br>C:${Math.round(r.chanceUsers)} S:${Math.round(r.sporadicUsers)} H:${Math.round(r.heavyUsers)}<br>FoodQ: ${r.foodQuality.toFixed(1)} Pop: ${Math.round(r.popularity)}`);
+                }
+            });
+
+            const chartLabel = `Y${currentYear}M${currentMonth}`; 
+            if (chartLabels.length === 0 || chartLabels[chartLabels.length -1] !== chartLabel) { 
+                chartLabels.push(chartLabel);
+                chanceUsersData.push(totalChanceUsersGlobal);
+                sporadicUsersData.push(totalSporadicUsersGlobal);
+                heavyUsersData.push(totalHeavyUsersGlobal);
+                profitData.push(totalCompanyProfit);
+
+                const maxDataPoints = 24; 
+                if (chartLabels.length > maxDataPoints) {
+                    chartLabels.shift(); 
+                    chanceUsersData.shift(); sporadicUsersData.shift(); heavyUsersData.shift();
+                    profitData.shift();
+                }
+            }
+            if (usersChartInstance && usersChartInstance.data) { 
+                usersChartInstance.data.labels = chartLabels; 
+                usersChartInstance.data.datasets[0].data = chanceUsersData; 
+                usersChartInstance.data.datasets[1].data = sporadicUsersData; 
+                usersChartInstance.data.datasets[2].data = heavyUsersData; 
+                usersChartInstance.update();
+            }
+
+            if (profitChartInstance && profitChartInstance.data) { 
+                profitChartInstance.data.labels = chartLabels; 
+                profitChartInstance.data.datasets[0].data = profitData; 
+                profitChartInstance.update();
+            }
+        }
+        
+        function logEvent(message, useCurrentDateForLog = false, type = "EVENT") { 
+            const logEntry = document.createElement('p');
+            let logYr = currentYear;
+            let logMo = currentMonth;
+
+            if (!useCurrentDateForLog && !jumpingYear) { 
+                 logMo = (currentMonth -1 <=0 ? 12 : currentMonth-1);
+                 logYr = (currentMonth -1 <=0 ? currentYear -1 : currentYear);
+                 if (logMo === 0) logMo = 12; 
+            }
+            logEntry.textContent = `[Y${logYr}M${logMo}] ${type}: ${message}`;
+            simulationLogEl.appendChild(logEntry);
+            simulationLogEl.scrollTop = simulationLogEl.scrollHeight; 
+        }
+
+        function populateInvestmentModal() {
+            modalDateEl.textContent = `Y${currentYear}M${currentMonth}`; 
+            restaurantInvestmentsListEl.innerHTML = ''; 
+            if (restaurants.length === 0) {
+                restaurantInvestmentsListEl.innerHTML = '<p class="text-sm text-gray-500">No open restaurants to invest in yet.</p>';
+            } else {
+                restaurants.forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = 'investment-item mb-3 p-3 border rounded-md bg-gray-50'; 
+                    const profitClass = r.lastWeeklyProfit >= 0 ? 'profit-positive' : 'profit-negative';
+                    div.innerHTML = `
+                        <h5 class="font-semibold text-indigo-600">${r.name} (FoodQ: ${r.foodQuality.toFixed(1)})</h5>
+                        <div class="text-xs text-gray-600 mt-1">
+                            <p>Users: C:${Math.round(r.chanceUsers)}, S:${Math.round(r.sporadicUsers)}, H:${Math.round(r.heavyUsers)}</p>
+                            <p>Last Wk Revenue: $${r.lastWeeklyRevenue ? r.lastWeeklyRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</p>
+                            <p>Last Wk Op. Cost: $${r.lastWeeklyOperatingCost ? r.lastWeeklyOperatingCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</p>
+                            <p>Last Wk Profit: <span class="${profitClass}">$${r.lastWeeklyProfit ? r.lastWeeklyProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</span></p>
+                        </div>
+                        <div class="mt-2">
+                            <label for="investFoodQ_${r.id}" class="text-sm">Improve Food Quality (Cost: $5,000, +0.2 FoodQ):</label>
+                            <input type="checkbox" id="investFoodQ_${r.id}" data-cost="5000" data-restaurantid="${r.id}" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 ml-2 invest-foodq">
+                        </div>
+                        <div class="mt-1">
+                            <label for="investLocalMarketing_${r.id}" class="text-sm">Local Marketing (Cost: $2,500, Boost next month):</label>
+                            <input type="checkbox" id="investLocalMarketing_${r.id}" data-cost="2500" data-restaurantid="${r.id}" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 ml-2 invest-localmarketing">
+                        </div>
+                    `;
+                    restaurantInvestmentsListEl.appendChild(div);
+                });
+            }
+
+            expansionCitySelectEl.innerHTML = '<option value="">-- Select a City --</option>'; 
+            if (availableExpansionCities.length > 0) {
+                availableExpansionCities.forEach((city, index) => {
+                    const option = document.createElement('option');
+                    option.value = index; 
+                    option.textContent = city.name;
+                    expansionCitySelectEl.appendChild(option);
+                });
+                expansionOpeningCostEl.textContent = getParameters().openingCost.toLocaleString();
+                expansionCitySelectEl.disabled = false;
+
+            } else {
+                expansionCitySelectEl.innerHTML = '<option value="">-- No more cities to expand to --</option>';
+                expansionOpeningCostEl.textContent = "N/A";
+                expansionCitySelectEl.disabled = true;
+            }
+            jumpYearButtonModalEl.disabled = !gameRunning || jumpingYear; 
+        }
+
+        function handleConfirmInvestments(isFirstMonthOfJump = false) {
+            if (jumpingYear && !isFirstMonthOfJump) return; 
+
+            let totalInvestmentCost = 0;
+            const params = getParameters(); 
+            let investmentsMadeThisTurn = false;
+
+            if (investAppRNDEl.checked) {
+                totalInvestmentCost += 10000;
+                globalAppQuality = Math.min(10, globalAppQuality + 0.5);
+                logEvent(`INVEST_APP_RND Cost: $10000. New AppQ: ${globalAppQuality.toFixed(1)}`, true, "ACTION");
+                investmentsMadeThisTurn = true;
+            }
+            if (investGlobalMarketingEl.checked) {
+                totalInvestmentCost += 20000;
+                globalMarketingBoostActive = true;
+                globalMarketingBoostWeeksRemaining = WEEKS_PER_MONTH; 
+                logEvent(`INVEST_GLOBAL_MKTG Cost: $20000.`, true, "ACTION");
+                investmentsMadeThisTurn = true;
+            }
+
+            document.querySelectorAll('.invest-foodq:checked').forEach(cb => {
+                const cost = parseInt(cb.dataset.cost);
+                totalInvestmentCost += cost;
+                const r = restaurants.find(res => res.id == cb.dataset.restaurantid);
+                if(r) {
+                    r.foodQuality = Math.min(10, r.foodQuality + 0.2);
+                    logEvent(`INVEST_FOOD_Q for ${r.name}. Cost: $${cost}. New FoodQ: ${r.foodQuality.toFixed(1)}`, true, "ACTION");
+                    investmentsMadeThisTurn = true;
+                }
+            });
+            document.querySelectorAll('.invest-localmarketing:checked').forEach(cb => {
+                const cost = parseInt(cb.dataset.cost);
+                totalInvestmentCost += cost;
+                const rId = cb.dataset.restaurantid;
+                const r = restaurants.find(res => res.id == rId);
+                if(r) {
+                    localMarketingBoosts[rId] = WEEKS_PER_MONTH; 
+                    logEvent(`INVEST_LOCAL_MKTG for ${r.name}. Cost: $${cost}.`, true, "ACTION");
+                    investmentsMadeThisTurn = true;
+                }
+            });
+
+            const selectedCityIndex = expansionCitySelectEl.value;
+            if (selectedCityIndex !== "") {
+                const cityData = availableExpansionCities[parseInt(selectedCityIndex)];
+                if (cityData && totalCompanyProfit >= params.openingCost + totalInvestmentCost) { 
+                    const expansionCost = params.openingCost;
+                    totalInvestmentCost += expansionCost;
+                    logEvent(`EXPAND_TO ${cityData.name}. Cost: $${expansionCost.toLocaleString()}`, true, "ACTION");
+                    openNewRestaurant(cityData.name, cityData.lat, cityData.lng, params); 
+                    availableExpansionCities.splice(parseInt(selectedCityIndex), 1);
+                    investmentsMadeThisTurn = true;
+                } else if (cityData) {
+                    showMessage(`Not enough profit to expand to ${cityData.name} after other investments. Need $${(params.openingCost + totalInvestmentCost - totalCompanyProfit).toLocaleString()} more.`);
+                    logEvent(`EXPAND_TO ${cityData.name} FAILED (funds).`, true, "ACTION_FAIL");
+                }
+            }
+            
+            totalCompanyProfit -= totalInvestmentCost;
+            if(investmentsMadeThisTurn) {
+                logEvent(`Total Investments: $${totalInvestmentCost.toLocaleString()}. Profit now: $${Math.round(totalCompanyProfit).toLocaleString()}`, true, "FINANCE");
+            } else if (!isFirstMonthOfJump) { 
+                logEvent(`No investments made this month.`, true, "FINANCE");
+            }
+
+
+            investAppRNDEl.checked = false;
+            investGlobalMarketingEl.checked = false;
+            document.querySelectorAll('.invest-foodq, .invest-localmarketing').forEach(cb => cb.checked = false);
+            expansionCitySelectEl.value = ""; 
+
+            if (!isFirstMonthOfJump) { 
+                investmentModal.classList.add('hidden');
+                simulationPausedForInvestment = false;
+                jumpYearButtonModalEl.disabled = true; 
+            
+                currentMonth++;
+                if (currentMonth > MONTHS_PER_YEAR) {
+                    currentMonth = 1;
+                    currentYear++;
+                }
+            
+                if(gameRunning) {
+                    runSingleMonthSimulation();
+                }
+            }
+        }
+        confirmInvestmentsButton.addEventListener('click', () => handleConfirmInvestments(false));
+
+
+        function startGame() {
+            if (gameRunning) return;
+            gameRunning = true;
+            
+            const baseParams = getParameters();
+            globalAppQuality = baseParams.appQuality; 
+            globalFoodQualityBaseline = baseParams.foodQuality; 
+            totalCompanyProfit = baseParams.initialCash; 
+
+            logEvent("Game Started.", true, "GAME_EVENT");
+            for (const key in baseParams) {
+                logEvent(`PARAM_SET: ${key} = ${baseParams[key]}`, true, "PARAM_INIT");
+            }
+
+            startGameButton.disabled = true; 
+            disableParameterInputs(true); 
+            toggleParamsButtonHeaderEl.textContent = '[Show Params]'; 
+            parametersOuterSectionEl.classList.add('hidden'); 
+
+
+            updateGlobalUserTotals(); 
+            updateUI(); 
+            
+            runSingleMonthSimulation(); 
+        }
+        
+
+        function resetGame() {
+            gameRunning = false;
+            simulationPausedForInvestment = false;
+            jumpingYear = false;
+            
+            currentYear = 1; currentMonth = 1; currentGlobalWeek = 1;
+            
+            restaurants.forEach(r => { if (r.marker) map.removeLayer(r.marker); });
+            restaurants = [];
+            totalChanceUsersGlobal = 0; totalSporadicUsersGlobal = 0; totalHeavyUsersGlobal = 0;
+            nextRestaurantId = 0; 
+            availableExpansionCities = [...basePotentialExpansionCities]; 
+            globalMarketingBoostActive = false; globalMarketingBoostWeeksRemaining = 0;
+            localMarketingBoosts = {};
+
+            chartLabels = []; 
+            chanceUsersData = []; sporadicUsersData = []; heavyUsersData = []; 
+            profitData = [];
+
+            if (usersChartInstance && usersChartInstance.data) { 
+                usersChartInstance.data.labels = []; 
+                usersChartInstance.data.datasets[0].data = []; 
+                usersChartInstance.data.datasets[1].data = []; 
+                usersChartInstance.data.datasets[2].data = []; 
+                usersChartInstance.update(); 
+            }
+            if (profitChartInstance && profitChartInstance.data) { 
+                profitChartInstance.data.labels = []; 
+                profitChartInstance.data.datasets[0].data = []; 
+                profitChartInstance.update(); 
+            }
+            
+            totalCompanyProfit = parseFloat(initialCashEl.value) || 100000; 
+
+            updateGlobalUserTotals(); 
+            currentDateEl.textContent = `Y${currentYear}, M${currentMonth} (Week ${currentGlobalWeek})`; 
+            totalRestaurantsEl.textContent = restaurants.length;
+            totalChanceUsersEl.textContent = "0";
+            totalSporadicUsersEl.textContent = "0";
+            totalHeavyUsersEl.textContent = "0";
+            totalUsersEl.textContent = "0"; 
+            totalProfitEl.textContent = `$${totalCompanyProfit.toLocaleString()}`; 
+
+            disableParameterInputs(false);
+            startGameButton.disabled = false;
+            jumpYearButtonModalEl.disabled = true; 
+            investmentModal.classList.add('hidden');
+            simulationLogEl.innerHTML = "Game reset. Ready to start.";
+            map.setView([39.8283, -98.5795], 3.5); 
+            parametersOuterSectionEl.classList.remove('hidden'); 
+            toggleParamsButtonHeaderEl.textContent = '[Hide Params]';
+            logEvent("Game Reset.", true, "GAME_EVENT");
+        }
+
+        function disableParameterInputs(disabled) {
+            const inputs = document.querySelectorAll('#parameters-outer-section input'); 
+            inputs.forEach(input => {
+                input.disabled = disabled;
+            });
+        }
+        
+        toggleParamsButtonHeaderEl.addEventListener('click', () => { 
+            parametersOuterSectionEl.classList.toggle('hidden');
+            toggleParamsButtonHeaderEl.textContent = parametersOuterSectionEl.classList.contains('hidden') ? '[Show Params]' : '[Hide Params]';
+        });
+
+        window.addEventListener('keydown', (event) => {
+            if (jumpingYear) return; 
+
+            if (simulationPausedForInvestment && !investmentModal.classList.contains('hidden')) {
+                if (event.key === 'n' || event.key === 'N') {
+                    event.preventDefault(); 
+                    confirmInvestmentsButton.click();
+                } else if (event.key === 'm' || event.key === 'M') { 
+                    event.preventDefault();
+                    jumpYearButtonModalEl.click(); 
+                } else if (event.key === 'a' || event.key === 'A') {
+                    event.preventDefault();
+                    investAppRNDEl.checked = !investAppRNDEl.checked;
+                } else if (event.key === 'g' || event.key === 'G') {
+                    event.preventDefault();
+                    investGlobalMarketingEl.checked = !investGlobalMarketingEl.checked;
+                } else if (event.key === 'e' || event.key === 'E') {
+                    event.preventDefault();
+                    if (expansionCitySelectEl.options.length > 1) { 
+                        expansionCitySelectEl.selectedIndex = 1; 
+                    }
+                }
+            }
+        });
+
+
+        startGameButton.addEventListener('click', startGame);
+        jumpYearButtonModalEl.addEventListener('click', jumpOneYear); 
+        resetGameButton.addEventListener('click', resetGame);
+
+        window.onload = () => { 
+            initMap(); initCharts();
+            initialCashEl.value = 100000;
+            foodQualityEl.value = 7; appQualityEl.value = 6;
+            revenuePerUserHeavyEl.value = 10; revenuePerUserSporadicEl.value = 4; revenuePerUserChanceEl.value = 8;
+            opCostRestaurantEl.value = 2000; openingCostEl.value = 50000;
+            initialMarketingBudgetEl.value = 7500; 
+            convertChanceToSporadicRateEl.value = 1.2;
+            convertSporadicToHeavyRateEl.value = 0.5;
+            convertChanceToHeavyRateEl.value = 0.25; 
+            churnChanceRateEl.value = 2.0;
+            churnSporadicRateEl.value = 1.0;
+            churnHeavyRateEl.value = 0.5;
+            
+            resetGame(); 
+            jumpYearButtonModalEl.disabled = true; 
+        };
+    </script>
+</body>
+</html>
+
