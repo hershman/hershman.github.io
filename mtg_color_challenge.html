@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG Color Guessing Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Tailwind gray-900 */
+            color: #e2e8f0; /* Tailwind gray-300 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            margin: 0;
+        }
+        #game-container {
+            background-color: #2d3748; /* Tailwind gray-800 */
+            padding: 1.5rem; /* p-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .clue-box {
+            background-color: #4a5568; /* Tailwind gray-700 */
+            padding: 1rem; /* p-4 */
+            border-radius: 0.375rem; /* rounded-md */
+            margin-top: 1rem; /* mt-4 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: pre-wrap; /* Preserve line breaks in rules text */
+            word-wrap: break-word;
+        }
+        #card-image-container img {
+            max-width: 80%;
+            height: auto;
+            border-radius: 0.375rem; /* rounded-md */
+            margin-top: 1rem; /* mt-4 */
+            border: 3px solid #718096; /* Tailwind gray-500 */
+        }
+        .answer-button, #next-card-button, #start-button {
+            background-color: #4299e1; /* Tailwind blue-500 */
+            color: white;
+            font-weight: 600; /* font-semibold */
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 0.375rem; /* rounded-md */
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin: 0.5rem; /* m-2 */
+        }
+        .answer-button:hover, #next-card-button:hover, #start-button:hover {
+            background-color: #3182ce; /* Tailwind blue-600 */
+        }
+        .answer-button:disabled, #next-card-button:disabled, #start-button:disabled {
+            background-color: #a0aec0; /* Tailwind gray-500 */
+            cursor: not-allowed;
+        }
+        #feedback-area {
+            margin-top: 1rem; /* mt-4 */
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+        }
+        .correct { color: #68d391; /* Tailwind green-400 */ }
+        .incorrect { color: #fc8181; /* Tailwind red-400 */ }
+        #score-area {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700; /* font-bold */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        #loading-indicator {
+            font-size: 1.125rem; /* text-lg */
+            margin: 1rem 0; /* my-4 */
+        }
+        #question-prompt {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+        .mana-symbol {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            border-radius: 50%;
+            background-color: #90cdf4; /* Light blue for generic mana */
+            color: #1a202c;
+            text-align: center;
+            line-height: 1em;
+            font-weight: bold;
+            margin: 0 0.1em;
+            vertical-align: text-bottom;
+        }
+        .mana-symbol.mana-x { background-color: #cbd5e0; } /* Gray for X */
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1 class="text-3xl font-bold mb-6">MTG Color Guessing Quiz</h1>
+        <div id="score-area">Score: <span id="score">0</span> | Questions: <span id="questions-asked">0</span></div>
+
+        <div id="loading-indicator" class="text-lg my-4" style="display: none;">Fetching a magical challenge... ✨</div>
+
+        <div id="quiz-area" style="display: none;">
+            <h2 id="question-prompt" class="text-xl font-semibold mb-2"></h2>
+            <div id="clue-display" class="clue-box text-lg"></div>
+            <div id="card-image-container" class="my-4" style="display: none;">
+                <img id="card-image" src="https://placehold.co/223x310/2d3748/e2e8f0?text=Card+Art" alt="Card Image" />
+            </div>
+            <div id="answer-reveal" class="mt-2 text-md" style="display: none;"></div>
+        </div>
+
+        <div id="controls-area">
+            <div id="answer-buttons" class="my-4">
+                </div>
+            <button id="start-button" class="answer-button">Start Game</button>
+            <button id="next-card-button" class="answer-button" style="display:none;">Next Card</button>
+        </div>
+        <div id="feedback-area" class="mt-4 text-lg font-semibold"></div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const scoreDisplay = document.getElementById('score');
+        const questionsAskedDisplay = document.getElementById('questions-asked');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const quizArea = document.getElementById('quiz-area');
+        const questionPrompt = document.getElementById('question-prompt');
+        const clueDisplay = document.getElementById('clue-display');
+        const cardImageContainer = document.getElementById('card-image-container');
+        const cardImage = document.getElementById('card-image');
+        const answerReveal = document.getElementById('answer-reveal');
+        const answerButtonsContainer = document.getElementById('answer-buttons');
+        const nextCardButton = document.getElementById('next-card-button');
+        const startButton = document.getElementById('start-button');
+        const feedbackArea = document.getElementById('feedback-area');
+
+        // Game State
+        let currentCard = null;
+        let score = 0;
+        let questionsAsked = 0;
+        let correctAnswerCategory = '';
+        let gameStarted = false;
+
+        const COLOR_CATEGORIES = [
+            { id: "W", name: "White" },
+            { id: "U", name: "Blue" },
+            { id: "B", name: "Black" },
+            { id: "R", name: "Red" },
+            { id: "G", name: "Green" },
+            { id: "Colorless", name: "Colorless" },
+            { id: "Multicolored", name: "Multicolored" }
+        ];
+
+        // Initialize answer buttons
+        COLOR_CATEGORIES.forEach(cat => {
+            const button = document.createElement('button');
+            button.classList.add('answer-button');
+            button.dataset.color = cat.id;
+            button.textContent = cat.name;
+            button.disabled = true; // Initially disabled
+            button.addEventListener('click', () => handleAnswer(cat.id));
+            answerButtonsContainer.appendChild(button);
+        });
+        const allAnswerButtons = answerButtonsContainer.querySelectorAll('.answer-button');
+
+
+        // --- Mana Sanitization Logic ---
+        // Helper to get CMC of a single mana symbol string (e.g., "W", "2/U", "3", "X")
+        function getSingleSymbolCmc(symbolContent) {
+            if (symbolContent === 'X' || symbolContent === 'Y' || symbolContent === 'Z') return 0; // X is 0 for CMC sum
+            if (!isNaN(parseInt(symbolContent))) return parseInt(symbolContent);
+
+            const phyrexianMatch = symbolContent.match(/^([WUBRGCS])\/P$/i);
+            if (phyrexianMatch) return 1;
+
+            const hybridMatch = symbolContent.match(/^([WUBRGCS])\/([WUBRGCS])$/i);
+            if (hybridMatch) return 1;
+
+            const twoBridMatch = symbolContent.match(/^2\/([WUBRGCS])$/i);
+            if (twoBridMatch) return 2;
+
+            if (symbolContent.length === 1 && "WUBRGCS".includes(symbolContent.toUpperCase())) return 1;
+            return 0; // Should not be reached for valid mana symbols
+        }
+
+        // Regex for the content of a mana symbol, e.g. "W", "2/U", "X", "10"
+        const validSymbolContentPatternSource = /[0-9]+|[XYZS]|C|[WUBRG](?:\/P)?|[WUBRG]\/[WUBRG]|2\/[WUBRG]/i.source;
+        // Regex to find sequences of mana symbols like {2}{W}{U} or {X}{R} or {G}
+        const manaCostPattern = new RegExp(`(?:\\{(${validSymbolContentPatternSource})\\})+`, 'g');
+        // Regex to extract individual symbols from a matched cost string
+        const individualSymbolsRegex = new RegExp(`\\{(${validSymbolContentPatternSource})\\}`, 'g');
+
+        function sanitizeOracleText(oracleText) {
+            if (!oracleText) return "";
+
+            return oracleText.replace(manaCostPattern, (costString) => {
+                // costString is like "{2}{W}{U}" or "{X}{R}"
+                let symbols = [];
+                let match;
+                // Reset lastIndex for global regex in a loop
+                individualSymbolsRegex.lastIndex = 0; 
+                while ((match = individualSymbolsRegex.exec(costString)) !== null) {
+                    symbols.push(match[1]); // Extract content like "2", "W", "U"
+                }
+
+                let containsX = false;
+                let currentCmcSum = 0;
+                let newCostStringParts = [];
+
+                for (const symbolContent of symbols) {
+                    const upperSymbolContent = symbolContent.toUpperCase();
+                    if (upperSymbolContent === 'X' || upperSymbolContent === 'Y' || upperSymbolContent === 'Z') {
+                        containsX = true;
+                        newCostStringParts.push(`{${upperSymbolContent}}`);
+                    } else if (/[WUBRG]/.test(upperSymbolContent) || 
+                               (upperSymbolContent.includes('/') && /[WUBRG]/.test(upperSymbolContent.replace('/P','')))) {
+                        // This is a colored symbol (W, U, B, R, G, W/U, G/P, 2/W etc.)
+                        if (containsX) {
+                            newCostStringParts.push('{1}'); 
+                        } else {
+                            currentCmcSum += getSingleSymbolCmc(upperSymbolContent);
+                        }
+                    } else { // Numeric {2}, Colorless {C}, Snow {S}
+                        if (containsX) {
+                            newCostStringParts.push(`{${upperSymbolContent}}`);
+                        } else {
+                            currentCmcSum += getSingleSymbolCmc(upperSymbolContent);
+                        }
+                    }
+                }
+
+                if (containsX) {
+                    return newCostStringParts.join('').replace(/\{(\d+|X|Y|Z)\}/g, (match, p1) => {
+                        if (p1.toUpperCase() === 'X' || p1.toUpperCase() === 'Y' || p1.toUpperCase() === 'Z') {
+                             return `<span class="mana-symbol mana-x">${p1.toUpperCase()}</span>`;
+                        }
+                        return `<span class="mana-symbol">${p1}</span>`;
+                    });
+                } else {
+                     return `<span class="mana-symbol">${currentCmcSum}</span>`;
+                }
+            }).replace(/\{(T|Q|E|CHAOS)\}/g, '<span class="mana-symbol">$1</span>') // Style tap/untap etc.
+              .replace(/\n/g, '<br>'); // Preserve line breaks
+        }
+        
+        // --- Game Logic ---
+        function determineCorrectColorCategory(card) {
+            let trueColors = card.colors || [];
+
+            // For MDFCs or cards where 'colors' might be missing but faces have them
+            if (trueColors.length === 0 && card.card_faces && card.card_faces.length > 0) {
+                const faceColorsSet = new Set();
+                card.card_faces.forEach(face => {
+                    (face.colors || []).forEach(c => faceColorsSet.add(c));
+                });
+                if (faceColorsSet.size > 0) {
+                    trueColors = Array.from(faceColorsSet);
+                }
+            }
+
+            if (trueColors.length === 0) return "Colorless";
+            if (trueColors.length === 1) return trueColors[0]; // W, U, B, R, G
+            return "Multicolored"; // More than one color
+        }
+
+        async function fetchCard() {
+            loadingIndicator.style.display = 'block';
+            quizArea.style.display = 'none';
+            feedbackArea.textContent = '';
+            answerReveal.style.display = 'none';
+            cardImageContainer.style.display = 'none';
+            cardImage.src = 'https://placehold.co/223x310/2d3748/e2e8f0?text=Loading...'; // Placeholder
+            nextCardButton.style.display = 'none';
+            allAnswerButtons.forEach(btn => btn.disabled = true);
+
+            try {
+                // Query to get a varied set of cards, excluding basic lands, funny cards, digital, etc.
+                const response = await fetch('https://api.scryfall.com/cards/random?q=lang:en+-is:funny+-is:digital+-type:basic_land+game:paper+(t:creature OR t:instant OR t:sorcery OR t:artifact OR t:enchantment OR t:planeswalker OR (t:land+-t:basic))');
+                if (!response.ok) {
+                    throw new Error(`Scryfall API error: ${response.status}`);
+                }
+                currentCard = await response.json();
+
+                if (!currentCard || (currentCard.object === 'error')) {
+                     throw new Error(currentCard.details || 'Failed to fetch a valid card.');
+                }
+
+                correctAnswerCategory = determineCorrectColorCategory(currentCard);
+                
+                // Determine clue type
+                let clueText = "";
+                let clueOracleText = currentCard.oracle_text;
+                if (currentCard.card_faces && currentCard.card_faces.length > 0 && !clueOracleText) {
+                    clueOracleText = currentCard.card_faces[0].oracle_text;
+                }
+
+
+                const hasName = currentCard.name && currentCard.name.trim() !== '';
+                const hasOracleText = clueOracleText && clueOracleText.trim() !== '';
+                let useNameAsClue;
+
+                if (hasName && hasOracleText) {
+                    useNameAsClue = Math.random() < 0.5;
+                } else if (hasName) {
+                    useNameAsClue = true;
+                } else if (hasOracleText) {
+                    useNameAsClue = false;
+                } else { // No name and no oracle text, fetch another card
+                    fetchCard();
+                    return;
+                }
+
+                if (useNameAsClue) {
+                    questionPrompt.textContent = "Guess the color(s) from the CARD NAME:";
+                    clueText = currentCard.name;
+                    clueDisplay.innerHTML = `<strong class="text-xl">${clueText}</strong>`;
+                } else {
+                    questionPrompt.textContent = "Guess the color(s) from the RULES TEXT:";
+                    clueText = sanitizeOracleText(clueOracleText);
+                    clueDisplay.innerHTML = clueText;
+                }
+                
+                quizArea.style.display = 'block';
+                allAnswerButtons.forEach(btn => btn.disabled = false);
+
+            } catch (error) {
+                console.error("Error fetching card:", error);
+                feedbackArea.textContent = `Error: ${error.message}. Trying again...`;
+                feedbackArea.className = 'incorrect';
+                // Retry after a short delay
+                setTimeout(fetchCard, 2000);
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        function handleAnswer(guessedCategory) {
+            allAnswerButtons.forEach(btn => btn.disabled = true);
+            questionsAsked++;
+            questionsAskedDisplay.textContent = questionsAsked;
+
+            let isCorrect = guessedCategory === correctAnswerCategory;
+            
+            // Special handling for WUBRG vs their full names for display
+            let displayCorrectAnswer = correctAnswerCategory;
+            const catObj = COLOR_CATEGORIES.find(c => c.id === correctAnswerCategory);
+            if (catObj) displayCorrectAnswer = catObj.name;
+
+
+            if (isCorrect) {
+                score++;
+                scoreDisplay.textContent = score;
+                feedbackArea.textContent = "Correct!";
+                feedbackArea.className = 'correct';
+            } else {
+                feedbackArea.textContent = "Incorrect!";
+                feedbackArea.className = 'incorrect';
+            }
+
+            // Reveal card info
+            let imageUrl = 'https://placehold.co/223x310/2d3748/e2e8f0?text=No+Image';
+            if (currentCard.image_uris && currentCard.image_uris.normal) {
+                imageUrl = currentCard.image_uris.normal;
+            } else if (currentCard.card_faces && currentCard.card_faces[0].image_uris && currentCard.card_faces[0].image_uris.normal) {
+                imageUrl = currentCard.card_faces[0].image_uris.normal;
+            }
+            cardImage.src = imageUrl;
+            cardImage.alt = currentCard.name;
+            cardImageContainer.style.display = 'block';
+
+            answerReveal.textContent = `The card is ${currentCard.name}, which is ${displayCorrectAnswer}.`;
+            answerReveal.style.display = 'block';
+            nextCardButton.style.display = 'inline-block';
+        }
+        
+        function startGame() {
+            gameStarted = true;
+            score = 0;
+            questionsAsked = 0;
+            scoreDisplay.textContent = score;
+            questionsAskedDisplay.textContent = questionsAsked;
+            startButton.style.display = 'none';
+            fetchCard();
+        }
+
+        // Event Listeners
+        startButton.addEventListener('click', startGame);
+        nextCardButton.addEventListener('click', fetchCard);
+
+        // Image error handler
+        cardImage.onerror = function() {
+            this.src = 'https://placehold.co/223x310/2d3748/e2e8f0?text=Image+Not+Found';
+            this.alt = 'Image not available';
+        };
+
+    </script>
+</body>
+</html>
