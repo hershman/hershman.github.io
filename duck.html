@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Baby Duck Sorter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none;
+            touch-action: none;
+        }
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #A0E9FF; /* Fallback river color */
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .river {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: #A0E9FF; /* Base river color */
+            background-image:
+                linear-gradient(45deg, rgba(255,255,255,0.07) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.07) 75%, transparent 75%, transparent),
+                linear-gradient(-45deg, rgba(255,255,255,0.07) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.07) 75%, transparent 75%, transparent);
+            background-size: 80px 80px;
+            animation: riverFlow 15s linear infinite;
+        }
+
+        @keyframes riverFlow {
+            0% { background-position: 0 0; }
+            100% { background-position: -160px 0; } /* Negative for right-to-left illusion */
+        }
+
+        .boats-container {
+            height: 170px; 
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+            background-color: #77C6E0;
+            border-top: 5px solid #5A9FB8;
+        }
+        .duck {
+            position: absolute;
+            width: 50px; 
+            height: 42px;
+            cursor: grab;
+            user-select: none;
+            z-index: 10;
+            transition: transform 0.1s ease-out;
+        }
+        .duck-svg-content {
+            width: 100%;
+            height: 100%;
+        }
+        .boat {
+            width: 130px; 
+            height: 130px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px; 
+            padding: 0;
+            transition: transform 0.2s ease-in-out;
+            background-color: rgba(255,255,255,0.1); 
+        }
+        .boat-svg-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Styling for EMPTY duck cutouts - darker for "hole" effect */
+        .boat-duck-cutout .duck-body-empty,
+        .boat-duck-cutout .duck-head-empty,
+        .boat-duck-cutout path.duck-tuft-empty {
+            fill: rgba(0,0,0,0.4); 
+            stroke-width: 0.5;
+            stroke: rgba(0,0,0,0.5); 
+        }
+        .boat-duck-cutout .duck-beak-empty {
+            fill: rgba(0,0,0,0.5); 
+        }
+         .boat-duck-cutout .duck-eye-empty {
+            fill: rgba(0,0,0,0.6); 
+        }
+
+        /* Styling for FILLED (Rainbow) duck cutouts */
+        .boat-duck-cutout .duck-body-rainbow,
+        .boat-duck-cutout .duck-head-rainbow,
+        .boat-duck-cutout path.duck-tuft-rainbow {
+            fill: url(#rainbowGradient);
+            stroke: #4A4A4A; /* Dark grey stroke for definition */
+            stroke-width: 0.75;
+        }
+        .boat-duck-cutout .duck-beak-rainbow {
+            fill: #4A4A4A; /* Dark grey beak */
+        }
+         .boat-duck-cutout .duck-eye-rainbow {
+            fill: black; 
+        }
+
+
+        .slot-filled-pop { /* Animation for the <g> element of the slot */
+            animation: slotPop 0.3s ease-out;
+        }
+        @keyframes slotPop { /* Operates on the <g> element which is already scaled */
+            0% { /* transform attribute is set by JS, this animates on top */ }
+            50% { transform: scale(1.20); } /* Pop out further from its base scale within the translate */
+            100% { /* Returns to its base scale within translate */ }
+        }
+        .duck-dance {
+            animation: duckDanceAnim 0.8s infinite ease-in-out;
+        }
+        @keyframes duckDanceAnim { /* Operates on the <g> element's existing transform */
+            0%, 100% { transform: translateY(0) rotate(0); } /* Relative to its current position and scale */
+            25% { transform: translateY(-5px) rotate(-10deg); } /* Adjusted for visibility with scale */
+            50% { transform: translateY(0) rotate(0); }
+            75% { transform: translateY(-5px) rotate(10deg); }
+        }
+
+
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            color: white;
+            text-align: center;
+        }
+        .start-button {
+            padding: 15px 30px;
+            font-size: 24px;
+            background-color: #FFD93D;
+            color: #4A4A4A;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .celebrate-boat {
+            animation: boatWiggle 0.5s ease-in-out 3;
+        }
+        @keyframes boatWiggle {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-5deg) scale(1.05); }
+            75% { transform: rotate(5deg) scale(1.05); }
+        }
+        .sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: gold;
+            border-radius: 50%;
+            opacity: 0;
+            animation: sparkleAnim 0.6s ease-out;
+            z-index: 50; 
+        }
+        @keyframes sparkleAnim {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .firework-particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            z-index: 60; 
+            opacity: 1;
+            pointer-events: none; 
+        }
+        
+        #score-card {
+            position: absolute;
+            top: 10px; /* Moved to top */
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-size: 12px;
+            color: #333;
+            z-index: 70;
+        }
+        #score-card div {
+            margin-bottom: 3px;
+        }
+        .hidden { /* Tailwind hidden class utility */
+             display: none;
+        }
+
+
+        @media (max-width: 600px) {
+            .duck {
+                width: 45px;
+                height: 38px;
+            }
+            .boat {
+                width: 100px; 
+                height: 100px;
+            }
+            .boats-container {
+                height: 140px; 
+            }
+            .start-button {
+                padding: 12px 24px;
+                font-size: 20px;
+            }
+            #score-card {
+                font-size: 10px;
+                padding: 6px 10px;
+                top: 5px; /* Adjusted for smaller screens */
+                right: 5px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-blue-200 select-none">
+    <svg width="0" height="0" style="position:absolute;opacity:0;pointer-events:none;">
+        <defs>
+            <linearGradient id="rainbowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#FF0000;" /> <stop offset="16.6%" style="stop-color:#FF7F00;" /> <stop offset="33.3%" style="stop-color:#FFFF00;" /> <stop offset="50%" style="stop-color:#00FF00;" /> <stop offset="66.6%" style="stop-color:#0000FF;" /> <stop offset="83.3%" style="stop-color:#4B0082;" /> <stop offset="100%" style="stop-color:#8B00FF;" /> </linearGradient>
+        </defs>
+    </svg>
+
+    <div id="game-container" class="game-container">
+        <div id="start-screen" class="start-screen">
+            <div>
+                <h1 class="text-4xl mb-4">Duck Sorter Fun!</h1>
+                <button id="start-button" class="start-button">Tap to Start</button>
+            </div>
+        </div>
+
+        <div id="river" class="river"></div>
+        <div id="boats-container" class="boats-container"></div>
+        <div id="score-card" class="hidden"> <div>Global Time: <span id="global-time">00:00</span></div>
+            <div>Round Time: <span id="round-time">00:00</span></div>
+            <div>Ducks Sorted: <span id="ducks-sorted">0</span></div>
+            <div>Rounds Won: <span id="rounds-won">0</span></div>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const river = document.getElementById('river');
+        const boatsContainer = document.getElementById('boats-container');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const scoreCardEl = document.getElementById('score-card'); // Score card element
+        const globalTimeEl = document.getElementById('global-time');
+        const roundTimeEl = document.getElementById('round-time');
+        const ducksSortedEl = document.getElementById('ducks-sorted');
+        const roundsWonEl = document.getElementById('rounds-won');
+
+
+        // --- Game Configuration ---
+        const DUCKS_PER_BOAT = 3;
+        const NUM_BOATS = 3;
+        const DUCK_SPEED_MIN = 0.3; 
+        const DUCK_SPEED_MAX = 0.8;
+        const DUCK_SPAWN_INTERVAL = 1800;
+        const MAX_DUCKS_IN_RIVER_FACTOR = 0.5; 
+        const DUCK_WIDTH_CSS = 50; 
+        const DUCK_HEIGHT_CSS = 42;
+
+
+        // --- Color Palette (for draggable ducks, boats) ---
+        const availableColors = [
+            { name: 'Red', hex: '#FF6B6B', beak: '#E55A5A' },
+            { name: 'Yellow', hex: '#FFD93D', beak: '#E5C036' },
+            { name: 'Blue', hex: '#6BCBFF', beak: '#5AAED8' },
+            { name: 'Green', hex: '#96E072', beak: '#82C765' },
+            { name: 'Purple', hex: '#C56DFF', beak: '#AF5EE5' }
+        ];
+        let gameColors = [];
+
+        // --- Game State ---
+        let boats = []; 
+        let ducksInRiver = [];
+        let draggedDuckInfo = null;
+        let duckSpawnTimer = null;
+        let gameLoopId = null;
+
+        // --- Score & Timer State ---
+        let globalStartTime = null;
+        let roundStartTime = null;
+        let globalTimerInterval = null;
+        let roundTimerInterval = null;
+        let totalDucksSortedCount = 0;
+        let roundsCompletedCount = 0;
+
+
+        // --- Audio ---
+        let synth;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            Tone.start(); 
+            synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "triangle8" }, 
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.15 },
+                volume: -6 
+            }).toDestination();
+            audioInitialized = true;
+        }
+
+        function playSound(type, note = "C5", duration = "16n") {
+            if (!audioInitialized || !synth) return;
+            try {
+                if (type === 'dropCorrect') {
+                    synth.triggerAttackRelease(note, duration, Tone.now());
+                } else if (type === 'boatFull') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C5", "8n", now);
+                    synth.triggerAttackRelease("E5", "8n", now + 0.15);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.3);
+                } else if (type === 'happyPoppyTune') { 
+                    const now = Tone.now();
+                    const notes = [
+                        { note: "C5", time: now, duration: "8n" }, { note: "E5", time: now + 0.2, duration: "8n" },
+                        { note: "G5", time: now + 0.4, duration: "8n" }, { note: "C6", time: now + 0.6, duration: "4n" },
+                        { note: "A5", time: now + 0.9, duration: "8n" }, { note: "G5", time: now + 1.1, duration: "8n" },
+                        { note: "E5", time: now + 1.3, duration: "8n" }, { note: "C5", time: now + 1.5, duration: "4n" },
+                        { note: "G5", time: now + 1.8, duration: "8n" }, { note: "C6", time: now + 2.0, duration: "2n" }
+                    ];
+                    notes.forEach(n => synth.triggerAttackRelease(n.note, n.duration, n.time));
+                }
+            } catch (error) {
+                console.error("Tone.js error:", error);
+            }
+        }
+
+        // --- Utility Functions ---
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function getRandomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // --- Duck SVGs ---
+        // Parameters: 
+        // colorInfo: object with hex/beak for draggable ducks, or null for placeholders/rainbow
+        // isEmptySlot: boolean, true for dark placeholder cutouts
+        // isRainbowFilledSlot: boolean, true for rainbow effect in filled boat slots
+        function createDuckSVGElementsString(colorInfo, isEmptySlot = false, isRainbowFilledSlot = false) {
+            let bodyFill, beakFill, eyeFill, strokeColor, strokeWidth;
+            let bodyClass, headClass, tuftClass, beakClass, eyeClass;
+
+            if (isEmptySlot) {
+                bodyFill = 'rgba(0,0,0,0.4)';
+                beakFill = 'rgba(0,0,0,0.5)';
+                eyeFill = 'rgba(0,0,0,0.6)';    
+                strokeColor = 'rgba(0,0,0,0.5)';
+                strokeWidth = "0.5";
+                bodyClass = 'duck-body-empty'; headClass = 'duck-head-empty'; tuftClass = 'duck-tuft-empty';
+                beakClass = 'duck-beak-empty'; eyeClass = 'duck-eye-empty';
+            } else if (isRainbowFilledSlot) {
+                bodyFill = 'url(#rainbowGradient)';
+                beakFill = '#4A4A4A'; // Dark grey beak for rainbow duck
+                eyeFill = 'black';    
+                strokeColor = '#4A4A4A'; // Dark grey stroke for rainbow duck
+                strokeWidth = "0.75";
+                bodyClass = 'duck-body-rainbow'; headClass = 'duck-head-rainbow'; tuftClass = 'duck-tuft-rainbow';
+                beakClass = 'duck-beak-rainbow'; eyeClass = 'duck-eye-rainbow';
+            } else { // Draggable duck
+                bodyFill = colorInfo.hex;
+                beakFill = colorInfo.beak;
+                eyeFill = 'black';    
+                strokeColor = colorInfo.beak;
+                strokeWidth = "1";
+                // No specific class needed for draggable, default SVG styling applies
+                bodyClass = ''; headClass = ''; tuftClass = ''; beakClass = ''; eyeClass = '';
+            }
+
+            return `
+                <ellipse class="${bodyClass}" cx="30" cy="30" rx="25" ry="15" fill="${bodyFill}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
+                <circle class="${headClass}" cx="18" cy="17" r="12" fill="${bodyFill}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
+                <path class="${tuftClass}" d="M12 10 Q18 5 24 10 T12 10" fill="${bodyFill}" stroke="${beakFill}" stroke-width="${strokeWidth}"/>
+                <circle class="${eyeClass}" cx="15" cy="15" r="2.5" fill="${eyeFill}" />
+                <polygon class="${beakClass}" points="5,17 0,14 0,20" fill="${beakFill}" />
+            `;
+        }
+        
+        // --- Boat SVG with Duck Cutouts ---
+        function createBoatSVGWithCutouts(boatColorInfo) {
+            let cutoutsHTML = '';
+            const cutoutScale = 0.45; 
+            const boatWidth = 120; 
+            const cutoutWidth = 60 * cutoutScale;
+            const spacing = 5; 
+            const totalCutoutWidth = DUCKS_PER_BOAT * cutoutWidth + (DUCKS_PER_BOAT - 1) * spacing;
+            const startX = (boatWidth - totalCutoutWidth) / 2;
+
+            for (let i = 0; i < DUCKS_PER_BOAT; i++) {
+                const posX = startX + i * (cutoutWidth + spacing);
+                const posY = 42; 
+                cutoutsHTML += `
+                    <g class="boat-duck-cutout" id="boat-${boatColorInfo.name}-slot-${i}" transform="translate(${posX}, ${posY}) scale(${cutoutScale})">
+                        ${createDuckSVGElementsString(null, true, false)} 
+                    </g>
+                `;
+            }
+
+            return `
+                <svg viewBox="0 0 120 80" class="boat-svg-container">
+                    <path d="M5 60 Q10 25 60 25 Q110 25 115 60 L95 78 L25 78 Z" fill="${boatColorInfo.hex}" stroke="${boatColorInfo.beak}" stroke-width="3"/>
+                    ${cutoutsHTML}
+                </svg>
+            `;
+        }
+        
+        // --- Game Element Creation ---
+        function createBoat(colorInfo) {
+            const boatElement = document.createElement('div');
+            boatElement.className = 'boat';
+            boatElement.innerHTML = createBoatSVGWithCutouts(colorInfo);
+            boatsContainer.appendChild(boatElement);
+            
+            const boatData = {
+                element: boatElement,
+                colorInfo: colorInfo,
+                capacity: DUCKS_PER_BOAT,
+                collectedDucks: [],
+                cutoutSVGGroups: Array.from(boatElement.querySelectorAll('.boat-duck-cutout'))
+            };
+            boats.push(boatData);
+        }
+
+        function updateBoatSlots(boatData, filledSlotIndex = -1) {
+            boatData.cutoutSVGGroups.forEach((slotGroup, index) => {
+                const isFilled = index < boatData.collectedDucks.length;
+                // For filled slots, pass colorInfo (not used by rainbow) and isRainbowFilledSlot = true
+                // For empty slots, pass null, isEmptySlot = true
+                slotGroup.innerHTML = createDuckSVGElementsString(
+                    isFilled ? boatData.colorInfo : null, // colorInfo is for potential future use if not rainbow
+                    !isFilled,                          // isEmptySlot
+                    isFilled                            // isRainbowFilledSlot
+                );
+
+                if (index === filledSlotIndex) {
+                    const originalTransform = slotGroup.getAttribute('transform');
+                    // Ensure the pop animation uses the `transform` attribute, not style, to avoid conflicts
+                    // with the base scale set in the `transform` attribute.
+                    // The CSS keyframes for slotPop should ideally animate `transform` property of the <g>
+                    // We can trigger it by adding a class.
+                    slotGroup.classList.add('slot-filled-pop');
+                    // Re-apply the original transform to ensure the animation base is correct
+                    slotGroup.setAttribute('transform', originalTransform); 
+                    setTimeout(() => {
+                        slotGroup.classList.remove('slot-filled-pop');
+                        // Ensure transform is reset if animation altered it and class removal doesn't fully revert
+                        slotGroup.setAttribute('transform', originalTransform); 
+                    }, 300); // Duration of slotPop animation
+                }
+            });
+        }
+        
+        function spawnDuck() {
+            const riverRect = river.getBoundingClientRect();
+            if (riverRect.width <= 0 || riverRect.height <= 0) return;
+
+            const totalCapacity = NUM_BOATS * DUCKS_PER_BOAT;
+            const maxDucksAllowed = Math.max(1, Math.floor(totalCapacity * MAX_DUCKS_IN_RIVER_FACTOR)); 
+            if (ducksInRiver.length >= maxDucksAllowed && !boats.every(b => b.collectedDucks.length === b.capacity)) return;
+
+            const colorCountsInRiver = {};
+            gameColors.forEach(gc => colorCountsInRiver[gc.hex] = 0);
+            ducksInRiver.forEach(d => {
+                if (d.colorInfo && colorCountsInRiver[d.colorInfo.hex] !== undefined) {
+                    colorCountsInRiver[d.colorInfo.hex]++;
+                }
+            });
+
+            const neededPerColorForBoats = {};
+            gameColors.forEach(gc => neededPerColorForBoats[gc.hex] = 0);
+            boats.forEach(b => {
+                if (b.colorInfo && neededPerColorForBoats[b.colorInfo.hex] !== undefined) {
+                    neededPerColorForBoats[b.colorInfo.hex] += (b.capacity - b.collectedDucks.length);
+                }
+            });
+
+            let targetColorInfo;
+            const understockedColors = gameColors.filter(gc => 
+                neededPerColorForBoats[gc.hex] > 0 && colorCountsInRiver[gc.hex] < neededPerColorForBoats[gc.hex]
+            );
+            
+            if (understockedColors.length > 0) {
+                targetColorInfo = understockedColors[Math.floor(Math.random() * understockedColors.length)];
+            } else {
+                const colorsWithAnyBoatCapacity = gameColors.filter(gc => 
+                    boats.some(b => b.colorInfo.hex === gc.hex && b.collectedDucks.length < b.capacity)
+                );
+                if (colorsWithAnyBoatCapacity.length > 0) {
+                   targetColorInfo = colorsWithAnyBoatCapacity[Math.floor(Math.random() * colorsWithAnyBoatCapacity.length)];
+                } else {
+                    if (ducksInRiver.length < maxDucksAllowed && gameColors.length > 0 && !boats.every(b => b.collectedDucks.length === b.capacity)) {
+                         targetColorInfo = gameColors[Math.floor(Math.random() * gameColors.length)];
+                    } else {
+                        return; 
+                    }
+                }
+            }
+             if (!targetColorInfo) return; 
+            createActualDuck(targetColorInfo);
+        }
+
+        function createActualDuck(colorInfo) {
+            const duckElement = document.createElement('div');
+            duckElement.className = 'duck';
+            duckElement.style.width = `${DUCK_WIDTH_CSS}px`; 
+            duckElement.style.height = `${DUCK_HEIGHT_CSS}px`;
+            // Draggable ducks are not empty and not rainbow slots
+            duckElement.innerHTML = `<svg viewBox="0 0 60 50" class="duck-svg-content">${createDuckSVGElementsString(colorInfo, false, false)}</svg>`;
+            
+            const riverRect = river.getBoundingClientRect();
+            if (riverRect.width <= 0 || riverRect.height <= 0) return; 
+
+            const duckHeight = parseFloat(duckElement.style.height);
+            const duckWidth = parseFloat(duckElement.style.width);
+
+            const y = getRandomInRange(0, riverRect.height - duckHeight);
+            const x = riverRect.width; 
+            
+            duckElement.style.left = `${x}px`;
+            duckElement.style.top = `${y}px`;
+
+            river.appendChild(duckElement);
+
+            const duckData = {
+                element: duckElement,
+                colorInfo: colorInfo,
+                y: y,
+                x: x,
+                speed: getRandomInRange(DUCK_SPEED_MIN, DUCK_SPEED_MAX),
+                isDragged: false
+            };
+            ducksInRiver.push(duckData);
+
+            duckElement.addEventListener('mousedown', (e) => handleDragStart(e, duckData));
+            duckElement.addEventListener('touchstart', (e) => handleDragStart(e, duckData), { passive: false });
+        }
+
+        function gameLoop() {
+            const riverRect = river.getBoundingClientRect();
+            if (riverRect.height <= 0 || riverRect.width <= 0) {
+                gameLoopId = requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            ducksInRiver.forEach((duckData, index) => {
+                if (!duckData.isDragged) {
+                    duckData.x -= duckData.speed; 
+                    duckData.element.style.left = `${duckData.x}px`;
+
+                    if (duckData.x < -DUCK_WIDTH_CSS) { 
+                        duckData.element.remove();
+                        ducksInRiver.splice(index, 1);
+                    }
+                }
+            });
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function handleDragStart(event, duckData) {
+            if (duckData.isDragged) return;
+            event.preventDefault();
+            initAudio();
+
+            duckData.isDragged = true;
+            const duckElement = duckData.element;
+            
+            const eventPos = event.type.startsWith('touch') ? event.touches[0] : event;
+            const rect = duckElement.getBoundingClientRect();
+            
+            draggedDuckInfo = {
+                element: duckElement,
+                colorInfo: duckData.colorInfo,
+                offsetX: eventPos.clientX - rect.left,
+                offsetY: eventPos.clientY - rect.top,
+                originalParent: duckElement.parentNode, 
+                originalRect: rect 
+            };
+
+            duckElement.style.cursor = 'grabbing';
+            duckElement.style.zIndex = '20';
+            gameContainer.appendChild(duckElement); 
+            
+            const gameContainerRect = gameContainer.getBoundingClientRect();
+            duckElement.style.left = `${eventPos.clientX - gameContainerRect.left - draggedDuckInfo.offsetX}px`;
+            duckElement.style.top = `${eventPos.clientY - gameContainerRect.top - draggedDuckInfo.offsetY}px`;
+        }
+
+        function handleDragMove(event) {
+            if (!draggedDuckInfo) return;
+            event.preventDefault();
+
+            const eventPos = event.type.startsWith('touch') ? event.touches[0] : event;
+            const gameContainerRect = gameContainer.getBoundingClientRect();
+
+            let newX = eventPos.clientX - gameContainerRect.left - draggedDuckInfo.offsetX;
+            let newY = eventPos.clientY - gameContainerRect.top - draggedDuckInfo.offsetY;
+            
+            const duckWidth = parseFloat(draggedDuckInfo.element.style.width);
+            const duckHeight = parseFloat(draggedDuckInfo.element.style.height);
+
+            newX = Math.max(0, Math.min(newX, gameContainerRect.width - duckWidth));
+            newY = Math.max(0, Math.min(newY, gameContainerRect.height - duckHeight));
+
+            draggedDuckInfo.element.style.left = `${newX}px`;
+            draggedDuckInfo.element.style.top = `${newY}px`;
+        }
+
+        function handleDragEnd(event) {
+            if (!draggedDuckInfo) return;
+
+            const duckElement = draggedDuckInfo.element;
+            duckElement.style.cursor = 'grab';
+            duckElement.style.zIndex = '10';
+
+            let droppedOnBoat = false;
+            const duckRect = duckElement.getBoundingClientRect();
+
+            for (const boatData of boats) {
+                const boatRect = boatData.element.getBoundingClientRect();
+                if (!(duckRect.right < boatRect.left || 
+                      duckRect.left > boatRect.right || 
+                      duckRect.bottom < boatRect.top || 
+                      duckRect.top > boatRect.bottom)) {
+                    
+                    if (boatData.colorInfo.hex === draggedDuckInfo.colorInfo.hex &&
+                        boatData.collectedDucks.length < boatData.capacity) {
+                        
+                        const slotIndexToFill = boatData.collectedDucks.length;
+                        boatData.collectedDucks.push(draggedDuckInfo.colorInfo);
+                        updateBoatSlots(boatData, slotIndexToFill); // Will now make it rainbow
+                        duckElement.remove(); 
+                        playSound('dropCorrect', 'E5');
+                        createSparkles(boatRect);
+
+                        totalDucksSortedCount++;
+                        updateScorecardDisplay();
+
+                        const riverDuckIndex = ducksInRiver.findIndex(d => d.element === duckElement);
+                        if (riverDuckIndex > -1) {
+                            ducksInRiver.splice(riverDuckIndex, 1);
+                        }
+                        droppedOnBoat = true;
+
+                        if (boatData.collectedDucks.length === boatData.capacity) {
+                            celebrateBoat(boatData.element);
+                            playSound('boatFull');
+                        }
+                        checkWinCondition();
+                        break; 
+                    }
+                }
+            }
+
+            if (!droppedOnBoat) {
+                const originalDuckData = ducksInRiver.find(d => d.element === duckElement);
+                if (originalDuckData) {
+                    originalDuckData.isDragged = false; 
+                    river.appendChild(duckElement);
+                    originalDuckData.x = river.getBoundingClientRect().width; 
+                    duckElement.style.left = `${originalDuckData.x}px`;
+                    duckElement.style.top = `${originalDuckData.y}px`; 
+                } else {
+                    duckElement.remove();
+                }
+            }
+            draggedDuckInfo = null;
+        }
+        
+        function createSparkles(targetRect) {
+            const numSparkles = 5;
+            const gameContainerRect = gameContainer.getBoundingClientRect();
+            for (let i = 0; i < numSparkles; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                const centerX = (targetRect.left - gameContainerRect.left) + targetRect.width / 2;
+                const centerY = (targetRect.top - gameContainerRect.top) + targetRect.height / 2;
+                
+                sparkle.style.left = `${centerX + (Math.random() - 0.5) * targetRect.width}px`;
+                sparkle.style.top = `${centerY + (Math.random() - 0.5) * targetRect.height}px`;
+                gameContainer.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 600);
+            }
+        }
+        
+        function createFireworks() {
+            const numBursts = 3 + Math.floor(Math.random() * 3); 
+            const gameRect = gameContainer.getBoundingClientRect();
+
+            for (let i = 0; i < numBursts; i++) {
+                setTimeout(() => { 
+                    const burstX = gameRect.width * (0.2 + Math.random() * 0.6); 
+                    const burstY = gameRect.height * (0.1 + Math.random() * 0.4); 
+                    const numParticles = 20 + Math.floor(Math.random() * 10);
+                    const burstColor = availableColors[Math.floor(Math.random() * availableColors.length)].hex;
+
+                    for (let j = 0; j < numParticles; j++) {
+                        const particle = document.createElement('div');
+                        particle.className = 'firework-particle';
+                        particle.style.backgroundColor = burstColor;
+                        particle.style.left = `${burstX}px`;
+                        particle.style.top = `${burstY}px`;
+                        gameContainer.appendChild(particle);
+
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = 50 + Math.random() * 80; 
+                        const duration = 800 + Math.random() * 400; 
+
+                        particle.animate([
+                            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                            { transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`, opacity: 0 }
+                        ], {
+                            duration: duration,
+                            easing: 'ease-out'
+                        });
+                        setTimeout(() => particle.remove(), duration);
+                    }
+                }, i * 300); 
+            }
+        }
+
+
+        function celebrateBoat(boatElement) {
+            boatElement.classList.add('celebrate-boat');
+            setTimeout(() => {
+                boatElement.classList.remove('celebrate-boat');
+            }, 1500);
+        }
+
+        function checkWinCondition() {
+            const allBoatsFull = boats.every(boat => boat.collectedDucks.length === boat.capacity);
+            if (allBoatsFull) {
+                playSound('happyPoppyTune'); 
+                createFireworks(); 
+
+                const winMessage = document.createElement('div');
+                winMessage.textContent = "All Full! Yay!";
+                winMessage.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-yellow-400 bg-blue-600 p-4 rounded-lg shadow-xl z-50';
+                gameContainer.appendChild(winMessage);
+
+                boats.forEach(boatData => {
+                    boatData.cutoutSVGGroups.forEach((slotGroup, index) => {
+                        if (index < boatData.collectedDucks.length) {
+                            const originalTransform = slotGroup.getAttribute('transform');
+                            slotGroup.classList.add('duck-dance');
+                            // Re-apply base transform to ensure dance is relative to scaled/positioned slot
+                            slotGroup.style.transform = originalTransform.replace(/scale\(([^)]+)\)/, `scale($1)`); 
+                        }
+                    });
+                });
+
+                if (duckSpawnTimer) clearInterval(duckSpawnTimer);
+                duckSpawnTimer = null;
+                roundsCompletedCount++;
+                updateScorecardDisplay();
+
+
+                setTimeout(() => {
+                    winMessage.remove();
+                    boats.forEach(boatData => {
+                        boatData.cutoutSVGGroups.forEach(slotGroup => {
+                            slotGroup.classList.remove('duck-dance');
+                            slotGroup.style.transform = ''; // Clear inline style to revert to attribute
+                        });
+                    });
+                    initGame(); 
+                }, 3500); 
+            }
+        }
+        
+        function updateTimersDisplay() {
+            if (globalStartTime) {
+                globalTimeEl.textContent = formatTime(Date.now() - globalStartTime);
+            }
+            if (roundStartTime) {
+                roundTimeEl.textContent = formatTime(Date.now() - roundStartTime);
+            }
+        }
+
+        function updateScorecardDisplay() {
+            ducksSortedEl.textContent = totalDucksSortedCount;
+            roundsWonEl.textContent = roundsCompletedCount;
+            updateTimersDisplay(); 
+        }
+
+
+        function clearGameElements() {
+            river.innerHTML = '';
+            boatsContainer.innerHTML = '';
+            ducksInRiver = [];
+            boats = [];
+            if (draggedDuckInfo && draggedDuckInfo.element) {
+                draggedDuckInfo.element.remove();
+                draggedDuckInfo = null;
+            }
+            const strayElements = gameContainer.querySelectorAll('.sparkle, .absolute.top-1\\/2, .firework-particle');
+            strayElements.forEach(el => el.remove());
+
+            if(roundTimerInterval) clearInterval(roundTimerInterval);
+            roundTimerInterval = null;
+        }
+
+        function initGame() {
+            clearGameElements();
+            gameColors = shuffleArray(availableColors).slice(0, NUM_BOATS);
+            gameColors.forEach(colorInfo => createBoat(colorInfo));
+
+            roundStartTime = Date.now();
+            if (!roundTimerInterval) { 
+                 roundTimerInterval = setInterval(updateTimersDisplay, 1000);
+            }
+            updateScorecardDisplay(); 
+
+            if (duckSpawnTimer) clearInterval(duckSpawnTimer);
+            duckSpawnTimer = setInterval(spawnDuck, DUCK_SPAWN_INTERVAL);
+            const initialSpawnCount = Math.max(1, Math.floor((NUM_BOATS * DUCKS_PER_BOAT * MAX_DUCKS_IN_RIVER_FACTOR)));
+            for(let i = 0; i < initialSpawnCount ; i++) {
+                setTimeout(spawnDuck, i * 700 + 200); 
+            }
+
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            scoreCardEl.classList.remove('hidden'); // Show score card
+            initAudio(); 
+
+            if (!globalStartTime) { 
+                globalStartTime = Date.now();
+                globalTimerInterval = setInterval(updateTimersDisplay, 1000);
+            }
+            initGame(); 
+
+            if (!gameContainer.dataset.listenersAdded) {
+                document.addEventListener('mousemove', handleDragMove, { passive: false });
+                document.addEventListener('mouseup', handleDragEnd, { passive: false });
+                document.addEventListener('touchmove', handleDragMove, { passive: false }); 
+                document.addEventListener('touchend', handleDragEnd, { passive: false });
+                gameContainer.dataset.listenersAdded = 'true';
+            }
+        }
+
+        startButton.addEventListener('click', startGame);
+
+        window.addEventListener('resize', () => {
+            // Resize logic can be added here
+        });
+
+    </script>
+</body>
+</html>
