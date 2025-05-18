@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicorn Name Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet"> 
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom animation for a little sparkle */
+        @keyframes sparkle-pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        .sparkle-effect {
+            animation: sparkle-pulse 1.5s infinite ease-in-out;
+        }
+
+        /* Animation for the unicorn name */
+        @keyframes breathe-text {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.02); opacity: 1; }
+        }
+        .fun-unicorn-name {
+            font-family: 'Pacifico', cursive;
+            background-image: linear-gradient(to right, #ec4899, #8b5cf6, #ef4444);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: breathe-text 2.8s infinite ease-in-out;
+        }
+
+        /* Horn Animations */
+        @keyframes horn-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        .horn-animate-pulse {
+            animation: horn-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes horn-shimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+        .horn-animate-shimmer {
+            animation: horn-shimmer 1.5s infinite alternate ease-in-out;
+        }
+         @keyframes horn-glow {
+            0%, 100% { filter: drop-shadow(0 0 1px white); }
+            50% { filter: drop-shadow(0 0 3px white); }
+        }
+        .horn-animate-glow {
+            animation: horn-glow 2.5s infinite ease-in-out;
+        }
+
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-300 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-pink-500 selection:text-white">
+
+    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-lg text-center">
+        <h1 class="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 mb-6">Magical Unicorn Generator</h1>
+        <p class="text-gray-600 mb-6 text-sm sm:text-base">Enter your name to summon a unique unicorn from the enchanted lands!</p>
+
+        <div class="mb-6">
+            <input type="text" id="nameInput" placeholder="What's your name?" class="w-full px-4 py-3 border border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-shadow shadow-sm">
+        </div>
+
+        <button id="generateButton" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 transform hover:scale-105 transition-all duration-300 ease-in-out">
+            ✨ Generate My Unicorn! ✨
+        </button>
+
+        <div id="unicornNameDisplayWrapper" class="mt-6 min-h-[40px] sm:min-h-[48px] flex items-center justify-center">
+             <h2 id="unicornNameDisplay" class="text-2xl sm:text-3xl font-semibold"></h2>
+        </div>
+
+
+        <div id="unicornCanvas" class="mt-4 w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto bg-pink-50/50 p-3 rounded-lg shadow-inner overflow-hidden min-h-[250px] sm:min-h-[300px] flex items-center justify-center">
+            <p class="text-gray-500 p-5 text-sm sm:text-base">Your magical friend awaits your call...</p>
+        </div>
+         <p class="text-xs text-gray-400 mt-6">Unicorns crafted with a sprinkle of code magic!</p>
+    </div>
+
+    <script>
+        // DOM Elements
+        const nameInputElement = document.getElementById('nameInput');
+        const generateButtonElement = document.getElementById('generateButton');
+        const unicornCanvasElement = document.getElementById('unicornCanvas');
+        const unicornNameDisplayElement = document.getElementById('unicornNameDisplay');
+
+        // --- Unicorn Properties ---
+        const bodyColors = ['#FFC0CB', '#ADD8E6', '#98FB98', '#FFD700', '#E6E6FA', '#FFB6C1', '#B0E0E6', '#F0E68C', '#D8BFD8', '#F5DEB3', '#E0FFFF', '#FFE4E1', '#FAFAD2', '#FFF0F5', '#F0FFF0'];
+        const maneTailColors = ['#FF69B4', '#87CEFA', '#32CD32', '#FFA500', '#DA70D6', '#FF1493', '#40E0D0', '#FFDEAD', '#BA55D3', '#FF7F50', '#66CDAA', '#DB7093', '#8FBC8F', '#EE82EE', '#9370DB'];
+        const hornColors = ['#FFDF00', '#C0C0C0', 'rainbow', '#F0F8FF', '#E0FFFF', '#FFDAB9', '#BDB76B', '#FFEBCD', '#FAF0E6', '#FFFACD'];
+        const eyeColors = ['#0077BE', '#228B22', '#8B4513', '#4B0082', '#1E90FF', '#FF4500', '#2E8B57', '#6A5ACD', '#8A2BE2', '#A52A2A'];
+        const ribbonColors = ['#FF69B4', '#87CEEB', '#90EE90', '#FFD700', '#DDA0DD', '#FFA07A']; // Added missing definition
+        
+        const hornStyles = ['spiral', 'smooth', 'crystal', 'banded', 'twisted', 'jeweled', 'delicate', 'fluted'];
+        const accessoryTypes = ['none', 'sparkles', 'starMark', 'collar', 'aura', 'flowerCrown', 'legWraps', 'ribbonTail', 'floatingStars']; 
+        const unicornCategories = ["Majestic", "Sparkling", "Enchanted", "Swift", "Dreamy", "Mystical", "Gentle", "Radiant", "Playful", "Noble", "Whimsical", "Celestial", "Glimmering", "Ethereal"];
+        const hornAnimations = ['horn-animate-pulse', 'horn-animate-shimmer', 'horn-animate-glow', 'none'];
+
+
+        // --- Event Listener ---
+        generateButtonElement.addEventListener('click', () => {
+            const name = nameInputElement.value.trim();
+            if (!name) {
+                unicornCanvasElement.innerHTML = '<p class="text-red-500 p-5 text-sm sm:text-base">Please enter a name to summon a unicorn!</p>';
+                unicornNameDisplayElement.textContent = '';
+                unicornNameDisplayElement.className = 'text-2xl sm:text-3xl font-semibold'; 
+                return;
+            }
+            generateAndDisplayUnicorn(name);
+        });
+        nameInputElement.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                generateButtonElement.click();
+            }
+        });
+
+        // --- Core Functions ---
+        function generateSeedFromName(name) {
+            let seed = 0;
+            const normalizedName = name.toLowerCase();
+            for (let i = 0; i < normalizedName.length; i++) {
+                seed = (seed * 31 + normalizedName.charCodeAt(i)) & 0xFFFFFFFF; 
+            }
+            return Math.abs(seed);
+        }
+
+        function seededRandom(seed, index) {
+            let t = seed += 0x6D2B79F5 + index * 0x10000; 
+            t = Math.imul(t ^ t >>> 15, t | 1);
+            t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        }
+
+        function generateAndDisplayUnicorn(name) {
+            const seed = generateSeedFromName(name);
+
+            const bodyColor = bodyColors[Math.floor(seededRandom(seed, 1) * bodyColors.length)];
+            const maneTailColor = maneTailColors[Math.floor(seededRandom(seed, 2) * maneTailColors.length)];
+            let hornColor = hornColors[Math.floor(seededRandom(seed, 3) * hornColors.length)];
+            const eyeColor = eyeColors[Math.floor(seededRandom(seed, 4) * eyeColors.length)];
+            const currentHornStyle = hornStyles[Math.floor(seededRandom(seed, 5) * hornStyles.length)];
+            const currentAccessory = accessoryTypes[Math.floor(seededRandom(seed, 6) * accessoryTypes.length)];
+            const category = unicornCategories[Math.floor(seededRandom(seed, 7) * unicornCategories.length)];
+            const currentHornAnimation = hornAnimations[Math.floor(seededRandom(seed, 8) * hornAnimations.length)];
+
+
+            const generatedUnicornName = `${name} the ${category}`;
+            
+            unicornNameDisplayElement.textContent = `Behold! ${generatedUnicornName}!`;
+            unicornNameDisplayElement.className = 'text-2xl sm:text-3xl font-semibold fun-unicorn-name';
+
+            unicornCanvasElement.innerHTML = drawDetailedUnicornSVG(bodyColor, maneTailColor, hornColor, eyeColor, currentHornStyle, currentAccessory, currentHornAnimation, seed, generatedUnicornName);
+        }
+
+        function getHornSVGPath(style, seed) {
+            const hornBaseYOffset = -28; 
+            const rotation = (seededRandom(seed, 9) * 15) - 7.5; 
+            const lengthFactor = 0.85 + seededRandom(seed, 10) * 0.55; 
+
+            let pathData = "";
+            switch (style) { 
+                case 'spiral':
+                    pathData = `M0,0 Q${1.8*lengthFactor},-${11*lengthFactor} 0,-${22*lengthFactor} Q-${1.8*lengthFactor},-${33*lengthFactor} 0,-${42*lengthFactor} L0.6,-${41*lengthFactor} Q-${1.2*lengthFactor},-${31*lengthFactor} -0.6,-${21*lengthFactor} Q${1.2*lengthFactor},-${10*lengthFactor} -0.6,0 Z`;
+                    break;
+                case 'smooth':
+                    pathData = `M-2.8,0 C-3.8,-${11*lengthFactor} 0,-${32*lengthFactor} 0,-${38*lengthFactor} C0,-${32*lengthFactor} 3.8,-${11*lengthFactor} 2.8,0 Z`;
+                    break;
+                case 'crystal': 
+                    pathData = `M0,0 L-${3.5*lengthFactor},-${9*lengthFactor} L-${1.8*lengthFactor},-${22*lengthFactor} L0,-${39*lengthFactor} L${1.8*lengthFactor},-${22*lengthFactor} L${3.5*lengthFactor},-${9*lengthFactor} Z`;
+                    break;
+                // Other horn styles...
+                default:
+                    pathData = `M-2.8,0 C-3.8,-${11*lengthFactor} 0,-${32*lengthFactor} 0,-${38*lengthFactor} C0,-${32*lengthFactor} 3.8,-${11*lengthFactor} 2.8,0 Z`;
+            }
+            return `<path d="${pathData}" transform="translate(0, ${hornBaseYOffset}) rotate(${rotation} 0 ${hornBaseYOffset})"`;
+        }
+
+        function drawDetailedUnicornSVG(bodyColor, maneTailColor, hornColorProp, eyeColor, hornStyle, accessory, hornAnimation, seed, unicornName) {
+            let hornFill = hornColorProp;
+            if (hornColorProp === 'rainbow') {
+                hornFill = "url(#unicornRainbowGradient)";
+            }
+
+            const overallScale = 0.95 + seededRandom(seed, 46) * 0.1; 
+
+            const headTilt = (seededRandom(seed, 23) * 6) - 3; 
+            const earScale = 0.9 + seededRandom(seed, 24) * 0.2;  
+            const maneVolumeScale = 0.92 + seededRandom(seed, 25) * 0.2; 
+            const tailCurlFactor = (seededRandom(seed, 26) * 6) - 3;  
+            const tailAngle = (seededRandom(seed, 17) * 10) - 5;   
+            const tailSizeScale = 0.9 + seededRandom(seed, 47) * 0.25; 
+
+            const bodyRxScale = 0.94 + seededRandom(seed, 27) * 0.12; 
+            const bodyRyScale = 0.97 + seededRandom(seed, 28) * 0.06; 
+            const neckLengthFactor = 0.96 + seededRandom(seed, 29) * 0.08;
+
+            const legAngleFactor = (seededRandom(seed, 30) * 2) - 1; 
+            const legSpecificAngleVar = 1; 
+
+            const frontLegReach1 = (seededRandom(seed, 31) * 1.5) - 0.75; 
+            const backLegReach1 = (seededRandom(seed, 33) * 1.5) - 0.75;  
+            const frontLegReach2 = (seededRandom(seed, 35) * 1.5) - 0.75; 
+            const backLegReach2 = (seededRandom(seed, 37) * 1.5) - 0.75;  
+            
+            const hoofScale = 0.9 + seededRandom(seed, 48) * 0.2; 
+
+            const eyeOffsetX = (seededRandom(seed, 38) * 0.5) - 0.25; 
+            const eyeOffsetY = (seededRandom(seed, 39) * 0.2) - 0.1;  
+
+
+            const hornPathElement = getHornSVGPath(hornStyle, seed); 
+            const hornAnimationClass = hornAnimation !== 'none' ? hornAnimation : '';
+            const completeHornSVG = `${hornPathElement} class="${hornAnimationClass}" fill="${hornFill}" stroke="${hornColorProp === 'rainbow' ? 'grey' : '#888888'}" stroke-width="0.75" />`;
+
+            let accessorySVG = ''; // This will hold the SVG for the currently selected accessory
+            const sparkleFill = `gold`; // Used in multiple accessory cases
+            const flowerColorsArr = ['#FFB6C1', '#FF69B4', '#DA70D6', '#FFFFFF', '#FFEEA0', '#ADD8E6', '#B0E0E6']; // Renamed to avoid conflict
+
+            // FULL SWITCH STATEMENT FOR ACCESSORIES
+            switch (accessory) {
+                case 'sparkles': 
+                    const numSparkles = 2 + Math.floor(seededRandom(seed, 11) * 2); 
+                    let sparklesTempSVG = '';
+                    for (let i = 0; i < numSparkles; i++) {
+                        const sx = 50 + seededRandom(seed, 12 + i) * 100; 
+                        const sy = 40 + seededRandom(seed, 13 + i + numSparkles) * 110; 
+                        const sSize = 1.5 + seededRandom(seed, 14 + i) * 2.8; 
+                        sparklesTempSVG += `<circle cx="${sx}" cy="${sy}" r="${sSize}" fill="${sparkleFill}" opacity="${0.45 + seededRandom(seed, 15+i)/4.5}" class="sparkle-effect"/>`;
+                    }
+                    accessorySVG = sparklesTempSVG;
+                    break;
+                case 'starMark': 
+                    const markX = 130 + (seededRandom(seed, 11) * 12 - 6); 
+                    const markY = 98 + (seededRandom(seed, 12) * 8 - 4);
+                    const markSize = 3.5 + seededRandom(seed, 13) * 2.5;
+                    const markFill = hornColorProp === 'rainbow' ? '#FFD700' : (hornColors.includes(hornColorProp) ? hornColorProp : maneTailColor) ;
+                    accessorySVG = `<polygon points="0,-${markSize} ${markSize*0.35},-${markSize*0.35} ${markSize},0 ${markSize*0.35},${markSize*0.35} 0,${markSize} -${markSize*0.35},${markSize*0.35} -${markSize},0 -${markSize*0.35},-${markSize*0.35}" fill="${markFill}" transform="translate(${markX}, ${markY}) rotate(${seededRandom(seed, 14) * 180})" opacity="0.8"/>`;
+                    break;
+                case 'collar':
+                     const collarFill = hornColorProp === 'rainbow' ? '#D4AF37' : (hornColors.includes(hornColorProp) ? hornColorProp : maneTailColor);
+                     accessorySVG = `<g transform="translate(100, ${90 * (1 + (neckLengthFactor-1)*0.2) - 5 + headTilt*0.1})">
+                                     <path d="M-7,0 Q0,8 7,0 L9,3 Q0,11 -9,3 Z" fill="${collarFill}" opacity="0.75"/>
+                                     <circle cx="0" cy="5.5" r="2.2" fill="${bodyColor}" stroke="${collarFill}" stroke-width="0.35"/>
+                                     <circle cx="0" cy="5.5" r="1.1" fill="${maneTailColor}"/>
+                                   </g>`;
+                    break;
+                case 'aura':
+                    accessorySVG = `<ellipse cx="110" cy="100" rx="${65 * bodyRxScale}" ry="${45 * bodyRyScale}" fill="${bodyColor}" opacity="${0.05 + seededRandom(seed,11)*0.05}" filter="url(#auraBlur)" />`;
+                    break;
+                case 'flowerCrown': // This SVG will be specifically placed in the head group
+                    let crownSVG = '';
+                    const numFlowers = 2 + Math.floor(seededRandom(seed, 40) * 2); 
+                    const crownRadius = 15; 
+                    const hornBaseYOffsetFC = -28; 
+                    for(let i=0; i<numFlowers; i++) {
+                        const angle = (i / numFlowers) * Math.PI * 1.3 - Math.PI*0.2 + seededRandom(seed, 41+i) * 0.25; 
+                        const fx = crownRadius * Math.cos(angle); 
+                        const fy = hornBaseYOffsetFC + crownRadius * Math.sin(angle) * 0.55; 
+                        const fSize = 2.2 + seededRandom(seed, 42+i) * 1.3;
+                        const fColor = flowerColorsArr[Math.floor(seededRandom(seed, 43+i) * flowerColorsArr.length)];
+                        for(let p=0; p<5; p++){
+                            const petalAngle = (p/5) * 2 * Math.PI;
+                            crownSVG += `<ellipse cx="${fx + Math.cos(petalAngle) * fSize * 0.45}" cy="${fy + Math.sin(petalAngle) * fSize * 0.45}" rx="${fSize*0.38}" ry="${fSize*0.23}" fill="${fColor}" transform="rotate(${petalAngle * 180/Math.PI + 90} ${fx + Math.cos(petalAngle) * fSize * 0.45} ${fy + Math.sin(petalAngle) * fSize * 0.45})" />`;
+                        }
+                        crownSVG += `<circle cx="${fx}" cy="${fy}" r="${fSize*0.23}" fill="yellow"/>`;
+                    }
+                    accessorySVG = crownSVG; 
+                    break;
+                case 'legWraps': 
+                    const wrapColor = maneTailColor;
+                    const wrapYOffset = 23; 
+                    const wrapHeight = 5.5;
+                    let legWrapsSVG = `<g opacity="0.7">`;
+                    legWrapsSVG += `<rect x="${110 - 1.8 + frontLegReach1*0.7}" y="${135 + wrapYOffset + legAngleFactor*0.15}" width="3.6" height="${wrapHeight}" fill="${wrapColor}" rx="1" transform="rotate(${legAngleFactor}, ${111.8 + frontLegReach1*0.7}, ${135 + wrapYOffset + legAngleFactor*0.15})"/>`;
+                    legWrapsSVG += `<rect x="${90 - 1.8 + backLegReach1*0.7}" y="${130 + wrapYOffset + legAngleFactor*0.15}" width="3.6" height="${wrapHeight}" fill="${wrapColor}" rx="1" transform="rotate(${legAngleFactor}, ${91.8 + backLegReach1*0.7}, ${130 + wrapYOffset + legAngleFactor*0.15})"/>`;
+                    legWrapsSVG += `</g>`;
+                    accessorySVG = legWrapsSVG;
+                    break;
+                case 'ribbonTail': // This SVG will be specifically placed with the tail group
+                    const currentRibbonColor = ribbonColors[Math.floor(seededRandom(seed, 45) * ribbonColors.length)];
+                    accessorySVG = `<g transform-origin="0 0" transform="translate(170,105) rotate(${tailAngle}) scale(${tailSizeScale}) translate(-170,-105)"> 
+                                        <g transform="translate(170,105)"> 
+                                            <path d="M-3,-2 Q-6,2 -1,5 L4,2 Q1,-2 -3,-2 Z" fill="${currentRibbonColor}" />
+                                            <path d="M-1,5 Q4,15 -3,20 L-6,15 Q-1,10 -1,5Z" fill="${currentRibbonColor}" opacity="0.8" transform="rotate(10 -1 5)"/>
+                                            <path d="M-1,5 Q-6,15 1,20 L4,15 Q-1,10 -1,5Z" fill="${currentRibbonColor}" opacity="0.8" transform="rotate(-10 -1 5)"/>
+                                        </g>
+                                    </g>`;
+                    break;
+                case 'floatingStars': 
+                    let starsTempSVG = '';
+                    const numFloatingStars = 2 + Math.floor(seededRandom(seed, 50) * 2); 
+                    for (let i = 0; i < numFloatingStars; i++) {
+                        const starX = 40 + seededRandom(seed, 51 + i) * 120;
+                        const starY = 30 + seededRandom(seed, 52 + i + numFloatingStars) * 100;
+                        const starSize = 2 + seededRandom(seed, 53 + i) * 2;
+                        let starFill = hornColors[Math.floor(seededRandom(seed, 54 + i) * hornColors.length)];
+                        if (starFill === 'rainbow') starFill = 'gold'; 
+                        starsTempSVG += `<polygon points="0,-${starSize} ${starSize*0.35},-${starSize*0.35} ${starSize},0 ${starSize*0.35},${starSize*0.35} 0,${starSize} -${starSize*0.35},${starSize*0.35} -${starSize},0 -${starSize*0.35},-${starSize*0.35}" fill="${starFill}" transform="translate(${starX}, ${starY}) rotate(${seededRandom(seed, 55 + i) * 360})" opacity="0.7" class="sparkle-effect"/>`;
+                    }
+                    accessorySVG = starsTempSVG;
+                    break;
+                default:
+                    accessorySVG = ''; // No accessory
+                    break;
+            }
+            
+            const hoofW = 7 * hoofScale;
+            const hoofH = 5 * hoofScale;
+
+            const nostrilPath = `<path d="M-16,13 Q-14.5,11.5 -13,13" stroke="#4B5563" stroke-width="1.2" fill="none" stroke-linecap="round"/>`; 
+            const mouthPath = `<path d="M-17,18 Q-11,19.5 -6,17" stroke="#4B5563" stroke-width="1.2" fill="none" stroke-linecap="round"/>`;   
+
+
+            const svg = `
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full transition-opacity duration-500 ease-in-out opacity-0" style="animation: fadeIn 0.5s forwards;" aria-label="An image of ${unicornName}">
+                    <title>${unicornName}</title>
+                    <style> @keyframes fadeIn { to { opacity: 1; } } </style>
+                    <defs>
+                        <linearGradient id="unicornRainbowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:red;stop-opacity:1" />
+                            <stop offset="16%" style="stop-color:orange;stop-opacity:1" />
+                            <stop offset="33%" style="stop-color:yellow;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:green;stop-opacity:1" />
+                            <stop offset="67%" style="stop-color:blue;stop-opacity:1" />
+                            <stop offset="84%" style="stop-color:indigo;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:violet;stop-opacity:1" />
+                        </linearGradient>
+                        <filter id="auraBlur">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="${0.7 + seededRandom(seed, 16)*1.3}" />
+                        </filter>
+                    </defs>
+                    <g transform="scale(${overallScale}) translate(${(200 * (1-overallScale))/2}, ${(200 * (1-overallScale))/2})"> 
+                        {/* Background Accessories */}
+                        ${(accessory === 'aura' || accessory === 'sparkles' || accessory === 'floatingStars') ? accessorySVG : ''}
+
+                        {/* Tail - Grouped for rotation and scaling around its base (170,105) */}
+                        <g transform="translate(170, 105) rotate(${tailAngle}) scale(${tailSizeScale}) translate(-170, -105)">
+                            <path d="M170,105 Q${183 + tailCurlFactor},${113 - tailCurlFactor/2} 170,${138 + tailCurlFactor/1.5} C163,${133 + tailCurlFactor*0.8} 153,${148 + tailCurlFactor*0.7} 143,${128 + tailCurlFactor*0.5} Q156,${110 + tailCurlFactor/3} 170,105 Z" fill="${maneTailColor}"/>
+                        </g>
+                        ${accessory === 'ribbonTail' ? accessorySVG : ''}
+
+
+                        {/* Neck - Drawn before head */}
+                        <path d="M100,${90 * (1 + (neckLengthFactor-1)*0.2)} Q${90 - (neckLengthFactor-1)*4},${72 - (neckLengthFactor-1)*8} 100,${60 - (neckLengthFactor-1)*12} L110,${65 - (neckLengthFactor-1)*11} Q114,${80 - (neckLengthFactor-1)*4} 100,${90 * (1 + (neckLengthFactor-1)*0.2)} Z" fill="${bodyColor}"/>
+                        
+                        {/* Head Group - Centered at (100,70), then tilted. All child coordinates are relative to (0,0) of this group. */}
+                        <g transform="translate(100, 70) rotate(${headTilt})"> 
+                            {/* Far Ear - Path relative to its own (0,0), then transformed into place relative to head center. */}
+                            <g transform="translate(15, -20) rotate(5) scale(${earScale*0.85})"> {/* Position, rotate, scale the far ear */}
+                                <path d="M0,0 L10,-7 L3,13 Q-1,9 0,0 Z" fill="${bodyColor}" stroke="${maneTailColor}" stroke-width="0.6" opacity="0.7"/>
+                            </g>
+
+                            {/* Back Mane - Relative to (0,0) of this group */}
+                            <path d="M${-4 - neckLengthFactor*1},${8 - neckLengthFactor*4} Q${-18 - neckLengthFactor*2},${-17 - neckLengthFactor*2.5} -4,-34 C${6},${-20} ${23 - neckLengthFactor*1.5},${-17 - neckLengthFactor*2} ${33 - neckLengthFactor*2.5},${-7 - neckLengthFactor*2.5} Q${18},${18 - neckLengthFactor*3.5} ${6 - neckLengthFactor*1.5},${28 - neckLengthFactor*4.5} Z" fill="${maneTailColor}" transform="translate(-10, -6) rotate(3) scale(${maneVolumeScale*0.9}, ${maneVolumeScale* (0.85 + seededRandom(seed,18)*0.15)})" />
+
+                            {/* Head Ellipse - Centered at (0,0) of this group */}
+                            <ellipse cx="0" cy="0" rx="21" ry="27" fill="${bodyColor}" />
+
+                            {/* Horn & Flower Crown (if any) - Horn path is already relative to (0, hornBaseYOffset) */}
+                            <g> 
+                                ${completeHornSVG} 
+                                ${accessory === 'flowerCrown' ? accessorySVG :''}
+                            </g>
+
+                            {/* Near Ear - Relative to (0,0) of this group */}
+                            {/* Original path: M-20,-17 L-31,-24 L-21,-4 Q-17,-9 -20,-17 Z */}
+                            <g transform="translate(-20, -17) rotate(${(seededRandom(seed,19)*10)-5}) scale(${earScale})">
+                                <path d="M0,0 L-11,-7 L-1,13 Q3,8 0,0 Z" fill="${bodyColor}" stroke="${maneTailColor}" stroke-width="0.7" />
+                            </g>
+                            
+                            {/* Far Eye - Relative to (0,0) of this group */}
+                            <ellipse cx="${8 + eyeOffsetX*0.7}" cy="${-3 + eyeOffsetY*0.7}" rx="2.8" ry="3.8" fill="white" opacity="0.8"/>
+                            <ellipse cx="${8 + eyeOffsetX*0.7}" cy="${-2 + eyeOffsetY*0.7}" rx="1.6" ry="2.6" fill="${eyeColor}" opacity="0.8"/>
+                            <circle cx="${7.5 + eyeOffsetX*0.7}" cy="${-3.5 + eyeOffsetY*0.7}" r="0.8" fill="white" opacity="0.7"/>
+
+                            {/* Near Eye - Relative to (0,0) of this group */}
+                            <ellipse cx="${-11 + eyeOffsetX}" cy="${-5 + eyeOffsetY}" rx="3.8" ry="4.8" fill="white"/>
+                            <ellipse cx="${-11 + eyeOffsetX}" cy="${-4 + eyeOffsetY}" rx="2.3" ry="3.3" fill="${eyeColor}" />
+                            <circle cx="${-12 + eyeOffsetX}" cy="${-5.5 + eyeOffsetY}" r="1.2" fill="white" opacity="0.9"/>
+                            
+                            {/* Front Mane - Relative to (0,0) of this group */}
+                            <path d="M-8,-10 Q-4,-30 8,-24 C4,-19 -2,-11 -8,-10Z" fill="${maneTailColor}" transform="scale(${maneVolumeScale * (0.9 + seededRandom(seed,20)*0.15)}, ${maneVolumeScale*0.95}) translate(0,-1)"/>
+                            <path d="M-4,-14 Q6,-33 14,-21 C9,-19 1,-14 -4,-14Z" fill="${maneTailColor}" opacity="0.75" transform="translate(2, -3) scale(${maneVolumeScale * (0.8 + seededRandom(seed,21)*0.15)}, ${maneVolumeScale * 0.85})"/>
+                            
+                            ${nostrilPath}
+                            ${mouthPath}
+                        </g> {/* */}
+
+                        {/* Body - Centered at (120,110) */}
+                        <ellipse cx="120" cy="110" rx="${53 * bodyRxScale}" ry="${33 * bodyRyScale}" fill="${bodyColor}" />
+                        
+                        {/* Collar - Drawn after body and neck */}
+                        ${accessory === 'collar' ? accessorySVG : ''}
+
+
+                        {/* Legs - Positioned relative to the main SVG canvas, then rotated */}
+                        {/* Back-left leg */}
+                        <g transform-origin="92.5 130" transform="translate(${backLegReach1/2}, ${backLegReach1/5}) rotate(${legAngleFactor + (seededRandom(seed,32)*legSpecificAngleVar-(legSpecificAngleVar/2))})">
+                            <path d="M90,130 Q88,150 90,170 L95,170 Q97,150 95,130 Z" fill="${bodyColor}" />
+                            <rect x="${92.5 - hoofW/2}" y="${170 - hoofH + 2}" width="${hoofW}" height="${hoofH}" fill="${maneTailColor}" rx="2"/>
+                        </g>
+                        
+                        {/* Front-left leg */}
+                         <g transform-origin="112.5 135" transform="translate(${frontLegReach1/2}, ${frontLegReach1/5}) rotate(${legAngleFactor + (seededRandom(seed,30)*legSpecificAngleVar-(legSpecificAngleVar/2))})">
+                            <path d="M110,135 Q108,155 110,175 L115,175 Q117,155 115,135 Z" fill="${bodyColor}" />
+                            <rect x="${112.5 - hoofW/2}" y="${175 - hoofH + 2}" width="${hoofW}" height="${hoofH}" fill="${maneTailColor}" rx="2"/>
+                        </g>
+
+                        {/* Back-right leg */}
+                        <g transform-origin="137.5 130" transform="translate(${backLegReach2/2}, ${backLegReach2/5}) rotate(${legAngleFactor + (seededRandom(seed,36)*legSpecificAngleVar-(legSpecificAngleVar/2))})">
+                            <path d="M135,130 Q133,150 135,170 L140,170 Q142,150 140,130 Z" fill="${bodyColor}" />
+                            <rect x="${137.5 - hoofW/2}" y="${170 - hoofH + 2}" width="${hoofW}" height="${hoofH}" fill="${maneTailColor}" rx="2"/>
+                        </g>
+                        
+                        {/* Front-right leg */}
+                        <g transform-origin="152.5 135" transform="translate(${frontLegReach2/2}, ${frontLegReach2/5}) rotate(${legAngleFactor + (seededRandom(seed,34)*legSpecificAngleVar-(legSpecificAngleVar/2))})">
+                            <path d="M150,135 Q148,155 150,175 L155,175 Q157,155 155,135 Z" fill="${bodyColor}" />
+                            <rect x="${152.5 - hoofW/2}" y="${175 - hoofH + 2}" width="${hoofW}" height="${hoofH}" fill="${maneTailColor}" rx="2"/>
+                        </g>
+                        
+                        {/* Accessories drawn on top (starMark, legWraps) */}
+                        ${(accessory === 'starMark' || accessory === 'legWraps') ? accessorySVG : ''} 
+                    </g> {/* */}
+                </svg>
+            `;
+            return svg;
+        }
+    </script>
+</body>
+</html>
