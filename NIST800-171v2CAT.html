@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIST 800-171 Rev. 2 Compliance Assessment Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .has-tooltip:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">NIST 800-171 Rev. 2 Compliance Assessment</h1>
+            <p class="text-slate-600 mt-2 text-lg">An interactive tool to track implementation status and evidence.</p>
+        </header>
+
+        <div id="assessment-container" class="space-y-4">
+            <!-- Control families will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: NIST 800-171 Rev. 2 Controls and Requirements ---
+        // This data is derived from the comprehensive research on the standard.
+        const controlFamilies = [
+            {
+                id: "ac",
+                name: "3.1 Access Control",
+                controls: [
+                    { id: "3.1.1", type: "Basic", description: "Limit information system access to authorized users, processes acting on behalf of authorized users, or devices (including other information systems).", tooltip: "Establish and manage a formal system for user accounts (creation, modification, disabling, removal) for all individuals, service accounts, and devices. Ensure access is granted based on a valid, approved business need." },
+                    { id: "3.1.2", type: "Basic", description: "Limit information system access to the types of transactions and functions that authorized users are permitted to execute.", tooltip: "Implement the principle of least privilege. Use Role-Based Access Control (RBAC) to ensure users only have the minimum permissions necessary to perform their job duties." },
+                    { id: "3.1.3", description: "Control the flow of CUI in accordance with approved authorizations.", tooltip: "Implement technical controls like Data Loss Prevention (DLP), firewall rules, and email filtering to prevent unauthorized data exfiltration and enforce data flow policies." },
+                    { id: "3.1.4", description: "Separate the duties of individuals to reduce the risk of malevolent activity without collusion.", tooltip: "Ensure no single individual has control over all aspects of a critical process. For example, the person requesting an account should not be the one who approves and creates it." },
+                    { id: "3.1.5", description: "Employ the principle of least privilege, including for specific security functions and privileged accounts.", tooltip: "Ensure powerful administrative accounts are used only when necessary for administrative tasks. Administrators should use separate, non-privileged accounts for daily activities." },
+                    { id: "3.1.6", description: "Use non-privileged accounts or roles when accessing nonsecurity functions.", tooltip: "Mandates that all users, especially administrators, perform routine tasks (email, browsing) using standard user accounts to minimize the impact of a potential compromise." },
+                    { id: "3.1.7", description: "Prevent non-privileged users from executing privileged functions and capture the execution of such functions in audit logs.", tooltip: "Configure systems to technically block standard users from performing administrative actions (e.g., installing software). Log all attempts, successful or not, to perform privileged functions." },
+                    { id: "3.1.8", description: "Limit unsuccessful logon attempts.", tooltip: "Configure systems to automatically lock an account for a defined period after a specific number of consecutive failed login attempts to prevent brute-force attacks." },
+                    { id: "3.1.9", description: "Provide privacy and security notices consistent with applicable CUI rules.", tooltip: "Display a logon banner before authentication that warns users the system is for authorized use only, activity is monitored, and there is no expectation of privacy." },
+                    { id: "3.1.11", description: "Terminate (automatically) a user session after a defined condition.", tooltip: "Automatically lock sessions after a period of inactivity (e.g., 15 minutes) and fully log out remote sessions after a longer period to prevent unauthorized access to unattended workstations." },
+                    { id: "3.1.12", description: "Monitor and control remote access sessions.", tooltip: "Log all remote access details (start/end times, source IP, user activity) and maintain the ability to terminate any suspicious session." },
+                    { id: "3.1.13", description: "Employ cryptographic mechanisms to protect the confidentiality of remote access sessions.", tooltip: "Use strong, validated encryption protocols (e.g., TLS 1.2+ VPN) for all remote access to protect CUI from eavesdropping." },
+                    { id: "3.1.14", description: "Route remote access via managed access control points.", tooltip: "Ensure all remote connections pass through a limited number of managed gateways (e.g., VPN concentrator, firewall) that enforce security policies." },
+                    { id: "3.1.15", description: "Authorize remote execution of privileged commands and remote access to security-relevant information.", tooltip: "Require separate, explicit authorization for performing administrative tasks remotely, beyond general remote access permission." },
+                    { id: "3.1.16", description: "Authorize wireless access prior to allowing such connections.", tooltip: "Implement a 'deny-by-default' policy for wireless networks. Use authentication like WPA2/WPA3-Enterprise to authorize each user or device before connection." },
+                    { id: "3.1.17", description: "Protect wireless access using authentication and encryption.", tooltip: "Use strong, FIPS-validated cryptographic protocols to authenticate users and encrypt all wireless traffic. Outdated protocols like WEP are not compliant." },
+                    { id: "3.1.18", description: "Control connection of mobile devices.", tooltip: "Use policies and tools like Mobile Device Management (MDM) to enforce security settings (e.g., PINs, encryption) on any mobile device accessing CUI." },
+                    { id: "3.1.19", description: "Encrypt CUI on mobile devices and mobile computing platforms.", tooltip: "Use full-disk encryption (e.g., BitLocker, FileVault) on laptops and device-level encryption on phones/tablets to protect stored CUI." },
+                    { id: "3.1.20", description: "Verify and control/limit connections to and use of external information systems.", tooltip: "Manage and monitor connections to external systems like cloud services or partner networks through firewalls, proxies, and formal authorization." },
+                    { id: "3.1.22", description: "Control CUI posted or processed on publicly accessible information systems.", tooltip: "Establish a formal review and approval process to ensure no CUI is ever posted on public systems like websites. Configure systems to prevent accidental disclosure." }
+                ]
+            },
+            {
+                id: "at",
+                name: "3.2 Awareness and Training",
+                controls: [
+                    { id: "3.2.1", type: "Basic", description: "Ensure that managers, systems administrators, and users of organizational information systems are made aware of the security risks associated with their activities and of the applicable policies, standards, and procedures related to the security of the systems.", tooltip: "Implement a mandatory, recurring security awareness program for all users covering topics like phishing, password security, and acceptable use policies. Track completion." },
+                    { id: "3.2.2", type: "Basic", description: "Ensure that personnel are trained to carry out their assigned information security-related duties and responsibilities.", tooltip: "Provide specialized, role-based training for personnel with specific security duties (e.g., administrators, incident responders) beyond general awareness." },
+                    { id: "3.2.3", description: "Provide security awareness training on recognizing and reporting potential indicators of insider threat.", tooltip: "Train employees to recognize and confidentially report potential insider threat indicators, such as unusual work hours or attempts to access unauthorized data." }
+                ]
+            },
+            {
+                id: "au",
+                name: "3.3 Audit and Accountability",
+                controls: [
+                    { id: "3.3.1", type: "Basic", description: "Create and retain information system audit records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful, unauthorized, or inappropriate information system activity.", tooltip: "Configure systems to generate and retain audit logs for security-relevant events for a defined period (e.g., 90+ days). Use a SIEM to collect and store logs." },
+                    { id: "3.3.2", type: "Basic", description: "Ensure that the actions of individual information system users can be uniquely traced to those users so they can be held accountable for their actions.", tooltip: "Prohibit the use of shared user accounts. Every user must have a unique ID to ensure actions in logs can be attributed to a specific person." },
+                    { id: "3.3.4", description: "Alert in the event of an audit process failure.", tooltip: "Configure the system to send an immediate alert to security personnel if the audit logging mechanism fails for any reason (e.g., disk full, service crash)." },
+                    { id: "3.3.5", description: "Correlate audit review, analysis, and reporting processes for investigation and response to indications of inappropriate, suspicious, or unusual activity.", tooltip: "Use a SIEM or similar tool to actively analyze and correlate log data from multiple sources to detect suspicious patterns and generate actionable alerts." },
+                    { id: "3.3.6", description: "Provide audit reduction and report generation to support on-demand analysis and reporting.", tooltip: "Use tools that can filter, sort, and summarize large volumes of log data into human-readable reports to support investigations." },
+                    { id: "3.3.7", description: "Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records.", tooltip: "Ensure all systems synchronize their clocks with a common, authoritative time source (e.g., an internal NTP server) for accurate event correlation." },
+                    { id: "3.3.8", description: "Protect audit information and audit tools from unauthorized access, modification, and deletion.", tooltip: "Tightly restrict access to audit logs and management tools. Store logs in a secure, tamper-resistant manner (e.g., append-only server)." },
+                    { id: "3.3.9", description: "Limit management of audit functionality to a subset of privileged users.", tooltip: "Restrict the ability to change audit settings or clear logs to a small, dedicated group of security personnel, separate from general system administrators." }
+                ]
+            },
+            {
+                id: "cm",
+                name: "3.4 Configuration Management",
+                controls: [
+                    { id: "3.4.1", type: "Basic", description: "Establish and maintain baseline configurations and inventories of organizational information systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.", tooltip: "Create and maintain a 'gold standard' secure configuration for each system type and a complete inventory of all hardware and software assets." },
+                    { id: "3.4.2", type: "Basic", description: "Establish and enforce security configuration settings for information technology products employed in organizational information systems.", tooltip: "Use technical controls (e.g., Group Policy, Ansible) to automatically enforce the secure baseline configurations on all systems." },
+                    { id: "3.4.3", description: "Track, review, approve or disapprove, and log changes to information systems.", tooltip: "Implement a formal change control process where all changes are requested, reviewed for security impact, approved, implemented, and documented." },
+                    { id: "3.4.4", description: "Analyze the security impact of changes prior to implementation.", tooltip: "As part of change control, perform and document a security impact analysis for every proposed change to assess potential risks and vulnerabilities." },
+                    { id: "3.4.5", description: "Define, document, approve, and enforce physical and logical access restrictions associated with changes to the information system.", tooltip: "Ensure that when a change is made (e.g., new software installed), the associated access controls are defined and implemented as part of the process." },
+                    { id: "3.4.6", description: "Employ the principle of least functionality by configuring the information system to provide only essential capabilities.", tooltip: "Reduce the attack surface by disabling or uninstalling any software, services, or network ports not absolutely required for the system's function." },
+                    { id: "3.4.7", description: "Restrict, disable, or prevent the use of nonessential programs, functions, ports, protocols, and services.", tooltip: "Use technical controls like application whitelisting and host-based firewalls to actively block unauthorized software and network protocols." },
+                    { id: "3.4.8", description: "Apply deny-by-exception (blacklist) policy or deny-all, permit-by-exception (whitelist) policy to allow the use of authorized software.", tooltip: "Control software execution using either a blacklist (block known bad) or, preferably, a whitelist (only allow known good)." },
+                    { id: "3.4.9", description: "Control and monitor user-installed software.", tooltip: "Prevent users from installing their own software by restricting administrative privileges. If allowed, monitor all user-installed software for threats." }
+                ]
+            },
+            {
+                id: "ia",
+                name: "3.5 Identification and Authentication",
+                controls: [
+                    { id: "3.5.1", type: "Basic", description: "Identify information system users, processes acting on behalf of users, or devices.", tooltip: "Assign a unique identifier (e.g., username, service account name, device ID) to every entity that interacts with the system." },
+                    { id: "3.5.2", type: "Basic", description: "Authenticate (or verify) the identity of those users, processes, or devices as a prerequisite to allowing access to organizational information systems.", tooltip: "Verify the claimed identity of a user, process, or device using an authentication mechanism like a password or, preferably, MFA." },
+                    { id: "3.5.3", description: "Use multifactor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.", tooltip: "MFA is mandatory for all remote access (all users) and all access to privileged accounts (including local/console access). MFA requires two or more factors (e.g., password + phone app)." },
+                    { id: "3.5.4", description: "Employ replay-resistant authentication mechanisms for network access to privileged and non-privileged accounts.", tooltip: "Use modern authentication protocols (e.g., Kerberos, OTP) that cannot be defeated by an attacker capturing and replaying the authentication data." },
+                    { id: "3.5.5", description: "Prevent the reuse of identifiers for a defined period.", tooltip: "When a user leaves, do not reassign their username to a new employee for a defined period to avoid confusion in audit logs." },
+                    { id: "3.5.6", description: "Disable identifiers after a defined period of inactivity.", tooltip: "Automatically disable user accounts that have been inactive for a defined period (e.g., 30-90 days) to mitigate the risk of compromise." },
+                    { id: "3.5.7", description: "Enforce a minimum password complexity and change of characters when new passwords are created.", tooltip: "Configure systems to require strong passwords (minimum length, mix of character types)." },
+                    { id: "3.5.8", description: "Prohibit password reuse for a specified number of generations.", tooltip: "Prevent users from reusing their recent passwords (e.g., last 24 passwords) when forced to make a change." },
+                    { id: "3.5.9", description: "Allow temporary password use for system logons with an immediate change to a permanent password.", tooltip: "Ensure that temporary passwords issued by an admin must be changed by the user upon first login." },
+                    { id: "3.5.10", description: "Store and transmit only cryptographically-protected passwords.", tooltip: "Never store passwords in clear text. Use a strong, salted hashing algorithm (e.g., bcrypt). Encrypt passwords during transmission using TLS." },
+                    { id: "3.5.11", description: "Obscure feedback of authentication information.", tooltip: "Do not display password characters on the screen as they are typed; show asterisks or dots instead to prevent 'shoulder surfing'." }
+                ]
+            },
+            {
+                id: "ir",
+                name: "3.6 Incident Response",
+                controls: [
+                    { id: "3.6.1", type: "Basic", description: "Establish an operational incident-handling capability for organizational information systems that includes preparation, detection, analysis, containment, recovery, and user response activities.", tooltip: "Develop a formal Incident Response Plan (IRP), form a dedicated Incident Response Team (IRT), and acquire necessary tools for handling security incidents." },
+                    { id: "3.6.2", type: "Basic", description: "Track, document, and report incidents to appropriate officials and/or authorities.", tooltip: "Track all incidents from detection to closure, documenting all actions. Report incidents involving DoD information to the government via DIBNet as required by DFARS." },
+                    { id: "3.6.3", description: "Test the organizational incident response capability.", tooltip: "Periodically test the IRP through exercises like tabletop scenarios or full-scale simulations. Use lessons learned to improve the plan." }
+                ]
+            },
+            {
+                id: "ma",
+                name: "3.7 Maintenance",
+                controls: [
+                    { id: "3.7.2", type: "Basic", description: "Provide effective controls on the tools, techniques, mechanisms, and personnel used to conduct information system maintenance.", tooltip: "Ensure all maintenance is performed by authorized personnel using approved tools and documented procedures." },
+                    { id: "3.7.3", description: "Ensure that equipment removed for off-site maintenance is sanitized of any CUI.", tooltip: "Securely delete all CUI from equipment before it is sent to an external vendor for repair. If not possible, the media must be destroyed or maintenance performed on-site under escort." },
+                    { id: "3.7.5", description: "Check media containing diagnostic and test programs for malicious code before the media are used in the information system.", tooltip: "Scan all maintenance tools, especially on portable media like USB drives, for malware before connecting them to the CUI environment." },
+                ]
+            },
+            {
+                id: "mp",
+                name: "3.8 Media Protection",
+                controls: [
+                    { id: "3.8.1", type: "Basic", description: "Protect (i.e., physically control and securely store) information system media containing CUI, both paper and digital.", tooltip: "Physically secure all media containing CUI. Store printed documents in locked cabinets and digital media (tapes, drives) in a safe. Control access to these locations." },
+                    { id: "3.8.2", type: "Basic", description: "Limit access to CUI on information system media to authorized users.", tooltip: "Apply both logical (permissions, encryption) and physical (locks) access controls to media. Log the check-in/check-out of physical media." },
+                    { id: "3.8.3", type: "Basic", description: "Sanitize or destroy information system media containing CUI before disposal or release for reuse.", tooltip: "Use approved methods (e.g., cross-cut shredding for paper, cryptographic erase or physical destruction for digital media per NIST SP 800-88) to destroy CUI before disposal." },
+                    { id: "3.8.4", description: "Mark media with CUI markings and distribution limitations.", tooltip: "Clearly label all media (physical and digital) containing CUI according to NARA standards (e.g., labels on drives, cover sheets, file headers/footers)." },
+                    { id: "3.8.5", description: "Control access to media storage areas.", tooltip: "Use formal access controls like card readers or key locks on doors to server rooms and media storage closets." },
+                    { id: "3.8.7", description: "Prohibit the use of portable storage devices when such devices have no identifiable owner.", tooltip: "Train employees never to plug in 'found' USB drives or other portable media of unknown origin." },
+                    { id: "3.8.8", description: "Protect the confidentiality of backup CUI at storage locations.", tooltip: "Ensure CUI in backups is protected with the same rigor as live data. This includes using secure off-site storage and encrypting the backup data itself." }
+                ]
+            },
+            {
+                id: "ps",
+                name: "3.9 Personnel Security",
+                controls: [
+                    { id: "3.9.1", type: "Basic", description: "Screen individuals prior to authorizing access to information systems containing CUI.", tooltip: "Perform background screening (e.g., reference checks, formal investigations) on all individuals before granting them access to CUI." },
+                    { id: "3.9.2", type: "Basic", description: "Ensure that CUI and information systems containing CUI are protected during and after personnel actions such as terminations and transfers.", tooltip: "Implement formal procedures for off-boarding and transfers. Immediately revoke all access for terminated employees and adjust permissions for transferred employees." }
+                ]
+            },
+            {
+                id: "pe",
+                name: "3.10 Physical Protection",
+                controls: [
+                    { id: "3.10.1", type: "Basic", description: "Limit physical access to organizational information systems, equipment, and the respective operating environments to authorized individuals.", tooltip: "Secure all physical locations where CUI is processed or stored using locks, card readers, or other physical access controls. Formally manage access credentials." },
+                    { id: "3.10.2", type: "Basic", description: "Protect and monitor the physical facility and support infrastructure for organizational information systems.", tooltip: "Use security cameras, intrusion detection systems, and environmental monitoring to protect the physical facility and supporting infrastructure (power, network)." },
+                    { id: "3.10.3", description: "Escort visitors and monitor visitor activity.", tooltip: "Ensure all visitors are escorted at all times by an authorized employee. Maintain a visitor log." },
+                    { id: "3.10.4", description: "Maintain audit logs of physical access.", tooltip: "Ensure physical access control systems (e.g., card readers) generate and retain logs of all access events for review." },
+                    { id: "3.10.5", description: "Control and manage physical access devices.", tooltip: "Implement a formal process for issuing, tracking, and revoking physical access devices like keys and access cards." },
+                    { id: "3.10.6", description: "Enforce safeguarding measures for CUI at alternate work sites.", tooltip: "Define and enforce policies for protecting CUI at remote work locations, such as home offices (e.g., screen privacy filters, secure document storage)." }
+                ]
+            },
+            {
+                id: "ra",
+                name: "3.11 Risk Assessment",
+                controls: [
+                    { id: "3.11.1", type: "Basic", description: "Periodically assess the risk to organizational operations (including mission, functions, image, or reputation), organizational assets, and individuals, resulting from the operation of organizational information systems and the associated processing, storage, or transmission of CUI.", tooltip: "Conduct formal risk assessments periodically (e.g., annually) to identify threats, vulnerabilities, and potential impacts. Use the results to prioritize security efforts." },
+                    { id: "3.11.2", description: "Scan for vulnerabilities in organizational information systems and applications periodically and when new vulnerabilities affecting those systems and applications are identified.", tooltip: "Implement a vulnerability management program using automated tools to scan systems and applications on a regular schedule and when major new vulnerabilities are announced." },
+                    { id: "3.11.3", description: "Remediate vulnerabilities in accordance with risk assessments.", tooltip: "Establish a process to fix identified vulnerabilities. Prioritize remediation efforts (e.g., patching) based on the risk they pose." }
+                ]
+            },
+            {
+                id: "ca",
+                name: "3.12 Security Assessment",
+                controls: [
+                    { id: "3.12.1", type: "Basic", description: "Periodically assess the security controls in organizational information systems to determine if the controls are effective in their application.", tooltip: "Conduct periodic internal self-assessments against the NIST 800-171 controls to verify their effectiveness. This is the basis for the SPRS score." },
+                    { id: "3.12.2", type: "Basic", description: "Develop and implement plans of action designed to correct deficiencies and reduce or eliminate vulnerabilities in organizational information systems.", tooltip: "When an assessment finds a deficiency, document it in a Plan of Action & Milestones (POA&M) with detailed remediation steps, resources, and timelines." },
+                    { id: "3.12.3", description: "Monitor security controls on an ongoing basis to ensure the continued effectiveness of the controls.", tooltip: "Move towards continuous monitoring by implementing tools and processes to check the status of security controls in near-real-time (e.g., automated compliance checks)." },
+                    { id: "3.12.4", description: "Develop, document, and periodically update system security plans that describe system boundaries, system environments of operation, how security requirements are implemented, and the relationships with or connections to other systems.", tooltip: "Create and maintain a comprehensive System Security Plan (SSP) that describes in detail how each of the 110 controls is implemented. This is a primary document for CMMC assessment." }
+                ]
+            },
+            {
+                id: "sc",
+                name: "3.13 System and Communications Protection",
+                controls: [
+                    { id: "3.13.1", type: "Basic", description: "Monitor, control, and protect organizational communications (i.e., information transmitted or received by organizational information systems) at the external boundaries and key internal boundaries of the information systems.", tooltip: "Deploy and configure firewalls at the network perimeter and at key internal boundaries to monitor and control all traffic based on a 'default-deny' policy." },
+                    { id: "3.13.2", type: "Basic", description: "Employ architectural designs, software development techniques, and systems engineering principles that promote information security and resilience.", tooltip: "Incorporate security from the start when designing systems ('security-by-design'), using principles like defense-in-depth and network segmentation." },
+                    { id: "3.13.5", description: "Implement subnetworks for publicly accessible system components that are physically or logically separated from internal networks.", tooltip: "Place any public-facing systems (e.g., web servers) in a segregated network zone (DMZ), separated from the internal network by a firewall." },
+                    { id: "3.13.6", description: "Deny network communications traffic by default and allow network communications traffic by exception (i.e., deny all, permit by exception).", tooltip: "Configure firewalls with a 'deny-all' rule as the default, then create specific rules to explicitly allow only necessary business traffic." },
+                    { id: "3.13.7", description: "Prevent remote devices from simultaneously establishing non-remote connections with the information system and communicating via some other connection to resources in external networks.", tooltip: "Disable 'split-tunneling' on VPNs. Force all traffic from a remote device through the VPN tunnel and the corporate security stack." },
+                    { id: "3.13.8", description: "Implement cryptographic mechanisms to prevent unauthorized disclosure of CUI during transmission.", tooltip: "Encrypt all CUI in transit using protocols like TLS (for HTTPS), secure email (S/MIME), and secure file transfer (SFTP)." },
+                    { id: "3.13.10", description: "Establish and manage cryptographic keys for cryptography employed in the information system.", tooltip: "Implement a formal process for the entire lifecycle of cryptographic keys: generation, distribution, storage, rotation, and revocation." },
+                    { id: "3.13.11", description: "Employ FIPS-validated cryptography when used to protect the confidentiality of CUI.", tooltip: "Ensure any cryptographic module used to protect CUI (e.g., in VPNs, OS) is formally validated against FIPS 140-2 and configured to run in 'FIPS mode'." },
+                    { id: "3.13.12", description: "Prohibit the remote activation of collaborative computing devices and provide an indication of use to users.", tooltip: "Ensure devices like webcams and microphones cannot be activated remotely without user knowledge and provide a clear physical indicator (e.g., an LED light) when in use." },
+                    { id: "3.13.13", description: "Control and monitor the use of mobile code.", tooltip: "Use browser security settings and network filtering to control what mobile code (e.g., JavaScript, ActiveX) is allowed to execute on local systems." },
+                    { id: "3.13.14", description: "Control and monitor the use of Voice over IP (VoIP) technologies.", tooltip: "If VoIP is used for CUI, secure the system by controlling device connections, monitoring traffic, and using encrypted protocols like SRTP." },
+                    { id: "3.13.16", description: "Protect the confidentiality of CUI at rest.", tooltip: "Encrypt all CUI stored on system components ('at rest'), including on server hard drives, in databases, and on storage networks. Use full-disk, file-level, or database encryption." }
+                ]
+            },
+            {
+                id: "si",
+                name: "3.14 System and Information Integrity",
+                controls: [
+                    { id: "3.14.1", type: "Basic", description: "Identify, report, and correct information and information system flaws in a timely manner.", tooltip: "Implement a robust patch and vulnerability management program to identify, report, and remediate system flaws based on risk." },
+                    { id: "3.14.2", type: "Basic", description: "Provide protection from malicious code at appropriate locations within organizational information systems.", tooltip: "Deploy anti-malware solutions on all endpoints (workstations, servers) and at the network gateway (email/web filtering)." },
+                    { id: "3.14.3", type: "Basic", description: "Monitor information system security alerts and advisories and take appropriate actions in response.", tooltip: "Establish a process to monitor security alerts from vendors and agencies (e.g., CISA) and take appropriate, timely action." },
+                    { id: "3.14.4", description: "Update malicious code protection mechanisms when new releases are available.", tooltip: "Ensure anti-malware software signature files and detection engines are configured to update automatically and frequently." },
+                    { id: "3.14.5", description: "Perform periodic scans of the information system and real-time scans of files from external sources as files are downloaded, opened, or executed.", tooltip: "Configure anti-malware tools to perform both scheduled full-system scans and real-time scanning of all new files from external sources." },
+                    { id: "3.14.6", description: "Monitor the information system, including inbound and outbound communications traffic, to detect attacks and indicators of potential attacks.", tooltip: "Deploy an Intrusion Detection/Prevention System (IDS/IPS) to monitor network traffic for signatures of known attacks or anomalous behavior." },
+                    { id: "3.14.7", description: "Identify unauthorized use of the information system.", tooltip: "Leverage audit logs, IDS/IPS alerts, and other monitoring tools to actively detect system use that violates security policies." }
+                ]
+            }
+        ];
+
+        // --- UI Generation and Interactivity ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('assessment-container');
+            if (!container) return;
+
+            // Function to generate the HTML for each control
+            const createControlHtml = (control) => {
+                const controlId = control.id.replace(/\./g, '-');
+                return `
+                    <div class="border-t border-slate-200">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-start">
+                            <!-- Control ID and Description -->
+                            <div class="md:col-span-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-slate-900">${control.id}</span>
+                                    ${control.type === 'Basic' ? '<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Basic</span>' : ''}
+                                    <div class="relative has-tooltip">
+                                        <svg class="w-5 h-5 text-slate-400 hover:text-blue-600 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <div class="tooltip absolute z-10 w-72 p-3 -mt-24 -ml-32 bg-slate-800 text-white text-sm rounded-lg shadow-lg">
+                                            <h4 class="font-bold mb-1">Compliance Guidance:</h4>
+                                            <p class="font-normal">${control.tooltip}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-slate-600 mt-1 text-sm">${control.description}</p>
+                            </div>
+
+                            <!-- Implementation Status -->
+                            <div class="md:col-span-2">
+                                <label for="status-${controlId}" class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                                <select id="status-${controlId}" class="w-full bg-white border border-slate-300 rounded-md shadow-sm p-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option>Not Assessed</option>
+                                    <option>Implemented</option>
+                                    <option>Partially Implemented</option>
+                                    <option>Not Implemented</option>
+                                    <option>Not Applicable</option>
+                                </select>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="md:col-span-3">
+                                <label for="notes-${controlId}" class="block text-sm font-medium text-slate-700 mb-1">Notes / Observations</label>
+                                <textarea id="notes-${controlId}" rows="3" class="w-full bg-white border border-slate-300 rounded-md shadow-sm p-2 text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Enter implementation details, findings..."></textarea>
+                            </div>
+
+                            <!-- Evidence -->
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Evidence</label>
+                                <label for="evidence-${controlId}" class="w-full inline-flex items-center justify-center px-4 py-2 bg-white text-sm font-medium text-slate-700 border border-slate-300 rounded-md shadow-sm hover:bg-slate-50 cursor-pointer">
+                                    <svg class="w-5 h-5 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    Upload File
+                                </label>
+                                <input type="file" id="evidence-${controlId}" class="hidden">
+                                <p id="evidence-name-${controlId}" class="text-xs text-slate-500 mt-1 truncate"></p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Function to generate the HTML for each family
+            const createFamilyHtml = (family) => {
+                return `
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <button class="accordion-header w-full flex justify-between items-center p-4 text-left bg-slate-50 hover:bg-slate-200 focus:outline-none">
+                            <h3 class="text-xl font-semibold text-slate-900">${family.name}</h3>
+                            <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content">
+                            ${family.controls.map(createControlHtml).join('')}
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Populate the container with all families
+            container.innerHTML = controlFamilies.map(createFamilyHtml).join('');
+
+            // Add event listeners for accordion functionality
+            container.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('svg');
+
+                    // Close other open accordions
+                    container.querySelectorAll('.accordion-header').forEach(otherHeader => {
+                        if (otherHeader !== header) {
+                            otherHeader.nextElementSibling.style.maxHeight = null;
+                            otherHeader.querySelector('svg').classList.remove('rotate-180');
+                        }
+                    });
+
+                    // Toggle current accordion
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.classList.remove('rotate-180');
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.classList.add('rotate-180');
+                    }
+                });
+            });
+
+            // Add event listeners for file upload feedback
+            container.querySelectorAll('input[type="file"]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const controlId = e.target.id.replace('evidence-', '');
+                    const fileNameDisplay = document.getElementById(`evidence-name-${controlId}`);
+                    if (e.target.files.length > 0) {
+                        fileNameDisplay.textContent = e.target.files[0].name;
+                    } else {
+                        fileNameDisplay.textContent = '';
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
