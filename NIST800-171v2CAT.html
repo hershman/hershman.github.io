@@ -247,8 +247,12 @@
             if (!container) return;
 
             // Function to generate the HTML for each control
-            const createControlHtml = (control) => {
+            const createControlHtml = (control, index, totalControls) => {
                 const controlId = control.id.replace(/\./g, '-');
+                // If the control is one of the last two in its family, align the tooltip to the bottom.
+                const isNearBottom = index >= totalControls - 2;
+                const tooltipVerticalPositionClass = isNearBottom ? 'bottom-0' : 'top-0';
+
                 return `
                     <div class="border-t border-slate-200">
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-start">
@@ -259,7 +263,7 @@
                                     ${control.type === 'Basic' ? '<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Basic</span>' : ''}
                                     <div class="relative has-tooltip">
                                         <svg class="w-5 h-5 text-slate-400 hover:text-blue-600 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        <div class="tooltip absolute z-10 w-64 p-3 top-0 left-8 bg-slate-800 text-white text-sm rounded-lg shadow-lg">
+                                        <div class="tooltip absolute z-10 w-64 p-3 ${tooltipVerticalPositionClass} left-8 bg-slate-800 text-white text-sm rounded-lg shadow-lg">
                                             <h4 class="font-bold mb-1">Compliance Guidance:</h4>
                                             <p class="font-normal">${control.tooltip}</p>
                                         </div>
@@ -310,7 +314,7 @@
                             <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
                         <div class="accordion-content">
-                            ${family.controls.map(createControlHtml).join('')}
+                            ${family.controls.map((control, index) => createControlHtml(control, index, family.controls.length)).join('')}
                         </div>
                     </div>
                 `;
