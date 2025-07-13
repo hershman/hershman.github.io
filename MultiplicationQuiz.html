@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Multiplication Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -16,11 +17,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: clamp(0.75rem, 3vw, 1.25rem); /* Responsive font size */
             font-weight: 500;
-            cursor: pointer;
             transition: all 0.2s ease-in-out;
-            /* Prevent selecting text in non-editing cells */
             user-select: none;
         }
         /* Style for header cells */
@@ -29,8 +28,8 @@
             background-color: #f3f4f6; /* gray-100 */
             cursor: default;
         }
-        /* Hover effect for unanswered cells */
-        .cell:not(.header):not(.revealed):not(.editing):hover {
+        /* Hover effect for unanswered cells in manual mode */
+        .cell:not(.header):not(.revealed):not(.editing):not(.game-active):hover {
             background-color: #dbeafe; /* blue-100 */
             transform: scale(1.05);
         }
@@ -39,127 +38,424 @@
             background-color: #a7f3d0; /* emerald-200 */
             color: #065f46; /* emerald-800 */
             cursor: default;
+            animation: popIn 0.3s ease;
         }
-        /* Style for cells being edited */
-        .cell.editing {
+        /* Style for cells being edited or active in game mode */
+        .cell.editing, .cell.game-active {
             background-color: #e0e7ff; /* indigo-100 */
             cursor: text;
-            outline: 2px solid #4f46e5; /* indigo-600 */
+            outline: 3px solid #4f46e5; /* indigo-600 */
             user-select: text;
+            transform: scale(1.1);
+            z-index: 10;
         }
         /* Style for the incorrect answer flash */
         .cell.incorrect {
             background-color: #fecaca; /* red-200 */
             animation: shake 0.5s;
         }
-
+        /* Animation for correct answer */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
         /* Simple shake animation for incorrect answers */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
+        /* Completion Animation */
+        .completion-animation .cell.revealed {
+            animation: celebrate 1s ease-in-out forwards;
+        }
+        @keyframes celebrate {
+            0% { transform: scale(1); background-color: #a7f3d0; }
+            50% { transform: scale(1.1) rotate(5deg); background-color: #6ee7b7; }
+            100% { transform: scale(1); background-color: #a7f3d0; }
+        }
+        /* Style for active mode button */
+        .mode-btn.active {
+            background-color: #4f46e5;
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
 
     <div class="w-full max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Multiplication Quiz</h1>
-        <p class="text-center text-gray-600 mb-8">Click a square, type the answer, and press Enter.</p>
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">Multiplication Quiz</h1>
+        
+        <!-- Mode Controls -->
+        <div id="mode-controls" class="flex justify-center gap-2 mb-4">
+            <button id="mode-show" class="mode-btn px-4 py-2 rounded-md font-semibold transition">Show Answers</button>
+            <button id="mode-manual" class="mode-btn px-4 py-2 rounded-md font-semibold transition">Manual Quiz</button>
+            <button id="mode-game" class="mode-btn px-4 py-2 rounded-md font-semibold transition">Game Mode</button>
+        </div>
+
+        <!-- Scoreboard -->
+        <div id="scoreboard" class="hidden text-center mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-gray-700">
+            <div>Time: <span id="time" class="font-bold">0s</span></div>
+            <div>Correct: <span id="correct-count" class="font-bold">0</span></div>
+            <div>Wrong: <span id="wrong-count" class="font-bold">0</span></div>
+            <div>Left: <span id="left-count" class="font-bold">0</span></div>
+        </div>
+
+        <div class="text-center">
+            <p id="instructions" class="text-center text-gray-600 mb-6">Select a mode to begin.</p>
+            <button id="start-game-btn" class="hidden mt-[-1rem] mb-4 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">Start Game</button>
+        </div>
 
         <!-- Grid container for the multiplication table -->
-        <div id="multiplication-grid" class="grid grid-cols-11 gap-2 p-4 bg-white rounded-lg shadow-lg">
+        <div id="multiplication-grid" class="hidden grid gap-1 sm:gap-2 p-2 sm:p-4 bg-white rounded-lg shadow-lg">
             <!-- Headers and cells will be generated by JavaScript -->
+        </div>
+
+        <!-- Grid Size Controls -->
+        <div id="size-controls" class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div class="flex items-center gap-2">
+                <label for="rows" class="font-medium text-gray-700">Rows:</label>
+                <input type="range" id="rows" name="rows" min="2" max="15" value="10" class="w-32 sm:w-48">
+                <span id="rows-value" class="font-bold w-6 text-center">10</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <label for="cols" class="font-medium text-gray-700">Cols:</label>
+                <input type="range" id="cols" name="cols" min="2" max="15" value="10" class="w-32 sm:w-48">
+                <span id="cols-value" class="font-bold w-6 text-center">10</span>
+            </div>
+            <button id="update-grid-btn" class="hidden px-5 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">Update</button>
         </div>
     </div>
 
     <script>
+        // --- DOM ELEMENTS ---
         const gridContainer = document.getElementById('multiplication-grid');
-        let activeCell = null; // To keep track of the cell being edited
+        const instructions = document.getElementById('instructions');
+        const scoreboard = document.getElementById('scoreboard');
+        const timeEl = document.getElementById('time');
+        const correctCountEl = document.getElementById('correct-count');
+        const wrongCountEl = document.getElementById('wrong-count');
+        const leftCountEl = document.getElementById('left-count');
+        const rowsSlider = document.getElementById('rows');
+        const colsSlider = document.getElementById('cols');
+        const rowsValue = document.getElementById('rows-value');
+        const colsValue = document.getElementById('cols-value');
+        const modeShowBtn = document.getElementById('mode-show');
+        const modeManualBtn = document.getElementById('mode-manual');
+        const modeGameBtn = document.getElementById('mode-game');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const sizeControls = document.getElementById('size-controls');
+        const updateGridBtn = document.getElementById('update-grid-btn');
 
-        // Function to check the answer and finalize the cell state
+        // --- STATE VARIABLES ---
+        let activeCell = null;
+        let currentMode = null; // 'show', 'manual', 'game'
+        let rows = 10;
+        let cols = 10;
+        let score = { correct: 0, wrong: 0 };
+        let timerInterval = null;
+        let seconds = 0;
+        let gameCellQueue = [];
+
+        // --- SOUND PLAYER FUNCTIONS (Tone.js) ---
+        function playCorrectSound() {
+            if (Tone.context.state !== 'running') Tone.start();
+            const synth = new Tone.Synth({ oscillator: { type: 'triangle' } }).toDestination();
+            synth.triggerAttackRelease("C4", "8n", Tone.now());
+        }
+
+        function playWrongSound() {
+            if (Tone.context.state !== 'running') Tone.start();
+            const synth = new Tone.MonoSynth({
+                frequency: "C2",
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 }
+            }).toDestination();
+            synth.triggerAttackRelease("8n", Tone.now());
+        }
+
+        function playCompletionSound() {
+            if (Tone.context.state !== 'running') Tone.start();
+            const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            synth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "8n", Tone.now());
+        }
+
+        function playTypeErrorSound() {
+            if (Tone.context.state !== 'running') Tone.start();
+            const synth = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).toDestination();
+            synth.triggerAttackRelease("8n", Tone.now());
+        }
+
+
+        // --- CORE FUNCTIONS ---
+
+        /**
+         * Creates and populates the multiplication grid based on current rows and cols
+         */
+        function createGrid() {
+            gridContainer.innerHTML = '';
+            gridContainer.classList.remove('completion-animation');
+            if (activeCell) {
+                activeCell.classList.remove('editing', 'game-active');
+                activeCell = null;
+            }
+            gridContainer.style.gridTemplateColumns = `repeat(${cols + 1}, minmax(0, 1fr))`;
+
+            for (let i = 0; i <= rows; i++) {
+                for (let j = 0; j <= cols; j++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell', 'border', 'rounded-md');
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+
+                    if (i === 0 && j === 0) {
+                        cell.classList.add('header');
+                        cell.textContent = '×';
+                    } else if (i === 0 || j === 0) {
+                        cell.classList.add('header');
+                        cell.textContent = i || j;
+                    } else {
+                        cell.dataset.value = i * j;
+                        cell.classList.add('quiz-cell');
+                        if (currentMode === 'show') {
+                            cell.textContent = cell.dataset.value;
+                            cell.classList.add('revealed');
+                        } else {
+                            cell.addEventListener('click', () => handleCellClick(cell));
+                            cell.addEventListener('keydown', (e) => handleKeyDown(e, cell));
+                            cell.addEventListener('blur', () => handleBlur(cell));
+                        }
+                    }
+                    gridContainer.appendChild(cell);
+                }
+            }
+            updateScoreboard();
+        }
+
+        /**
+         * Handles what happens when a user clicks a cell
+         */
+        function handleCellClick(cell) {
+            if (currentMode !== 'manual' || cell.classList.contains('revealed') || cell === activeCell) return;
+            if (activeCell) {
+                // Check and deactivate the previously active cell before switching
+                handleBlur(activeCell);
+            }
+            activateCell(cell);
+        }
+        
+        function activateCell(cell) {
+            activeCell = cell;
+            cell.contentEditable = true;
+            cell.classList.add('editing');
+            cell.textContent = '';
+            cell.focus();
+        }
+
+        /**
+         * Handles key presses within a cell, specifically for "Enter" to submit an answer.
+         */
+        function handleKeyDown(e, cell) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent new line
+                const isCorrect = checkAnswer(cell);
+
+                if (isCorrect) {
+                    // Deactivate the cell since it's correct
+                    cell.contentEditable = false;
+                    cell.classList.remove('editing', 'game-active');
+                    if (cell === activeCell) {
+                        activeCell = null;
+                    }
+                    // In game mode, move to the next cell
+                    if (currentMode === 'game') {
+                        selectNextGameCell();
+                    }
+                }
+                // If incorrect, do nothing. The cell remains active and focused for another try.
+            }
+        }
+
+        /**
+         * Handles losing focus on a cell (clicking away). This always deactivates the cell.
+         */
+        function handleBlur(cell) {
+            if (cell === activeCell) {
+                checkAnswer(cell);
+                // Always deactivate on blur, as the user has moved focus elsewhere.
+                cell.contentEditable = false;
+                cell.classList.remove('editing', 'game-active');
+                activeCell = null;
+            }
+        }
+
+        /**
+         * Checks the answer, updates styles/score, and returns true for correct, false for incorrect.
+         * Does NOT manage cell state (active/inactive).
+         */
         const checkAnswer = (cell) => {
-            if (!cell) return;
-            
-            const userAnswer = parseInt(cell.textContent);
+            if (!cell || !cell.classList.contains('quiz-cell')) return true;
+            const userAnswerStr = cell.textContent.trim();
             const correctAnswer = parseInt(cell.dataset.value);
 
-            // Make the cell non-editable again
-            cell.contentEditable = false;
-            cell.classList.remove('editing');
-            activeCell = null;
-
-            if (userAnswer === correctAnswer) {
-                // Correct answer
-                cell.textContent = correctAnswer;
-                cell.classList.add('revealed');
-                cell.classList.remove('incorrect');
+            if (userAnswerStr !== '' && parseInt(userAnswerStr) === correctAnswer) {
+                if (!cell.classList.contains('revealed')) {
+                    cell.textContent = correctAnswer;
+                    cell.classList.add('revealed');
+                    score.correct++;
+                    playCorrectSound();
+                }
+                updateScoreboard();
+                checkCompletion();
+                return true;
             } else {
-                // Incorrect answer
-                cell.textContent = ''; // Clear the wrong answer
-                cell.classList.add('incorrect');
-                setTimeout(() => {
-                    cell.classList.remove('incorrect');
-                }, 500);
+                cell.textContent = '';
+                if (userAnswerStr !== '') {
+                    score.wrong++;
+                    playWrongSound();
+                    cell.classList.add('incorrect');
+                    setTimeout(() => cell.classList.remove('incorrect'), 500);
+                }
+                updateScoreboard();
+                return false;
             }
         };
 
-        // Loop to create the 11x11 grid
-        for (let i = 0; i <= 10; i++) {
-            for (let j = 0; j <= 10; j++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell', 'border', 'rounded-md');
-
-                if (i === 0 && j === 0) {
-                    cell.classList.add('header');
-                } else if (i === 0) {
-                    cell.classList.add('header');
-                    cell.textContent = j;
-                } else if (j === 0) {
-                    cell.classList.add('header');
-                    cell.textContent = i;
-                } else {
-                    // These are the interactive quiz cells
-                    cell.dataset.value = i * j;
-
-                    cell.addEventListener('click', () => {
-                        // Ignore clicks on already revealed or currently editing cells
-                        if (cell.classList.contains('revealed') || cell === activeCell) {
-                            return;
-                        }
-
-                        // If another cell is being edited, check its answer first
-                        if (activeCell) {
-                            checkAnswer(activeCell);
-                        }
-
-                        // Activate the new cell for editing
-                        activeCell = cell;
-                        cell.contentEditable = true;
-                        cell.classList.add('editing');
-                        cell.textContent = '';
-                        cell.focus();
-                    });
-
-                    // Listen for "Enter" key to submit the answer
-                    cell.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault(); // Prevents adding a new line
-                            checkAnswer(cell);
-                        }
-                    });
-
-                    // Listen for when the user clicks away (blur)
-                    cell.addEventListener('blur', () => {
-                        // Only check answer on blur if this is the active cell
-                        if (cell === activeCell) {
-                            checkAnswer(cell);
-                        }
-                    });
-                }
-                gridContainer.appendChild(cell);
+        function checkCompletion() {
+            const quizCells = document.querySelectorAll('.quiz-cell');
+            if (quizCells.length > 0 && quizCells.length === document.querySelectorAll('.quiz-cell.revealed').length) {
+                stopTimer();
+                instructions.textContent = "Congratulations! You've completed the grid!";
+                gridContainer.classList.add('completion-animation');
+                playCompletionSound();
+                setTimeout(() => gridContainer.classList.remove('completion-animation'), 2000);
             }
         }
+        
+        // --- GAME MODE LOGIC ---
+        function startGameMode() {
+            const unrevealedCells = Array.from(document.querySelectorAll('.quiz-cell:not(.revealed)'));
+            gameCellQueue = unrevealedCells.sort(() => Math.random() - 0.5);
+            selectNextGameCell();
+        }
+
+        function selectNextGameCell() {
+            if (gameCellQueue.length > 0) {
+                const nextCell = gameCellQueue.shift();
+                if (activeCell) activeCell.classList.remove('game-active');
+                activeCell = nextCell;
+                activeCell.classList.add('game-active');
+                activeCell.contentEditable = true;
+                activeCell.textContent = '';
+                activeCell.focus();
+            } else {
+                checkCompletion();
+            }
+        }
+
+        // --- UI AND CONTROLS ---
+        function updateScoreboard() {
+            if (currentMode === 'manual' || currentMode === 'game') {
+                const total = document.querySelectorAll('.quiz-cell').length;
+                leftCountEl.textContent = total - score.correct;
+                correctCountEl.textContent = score.correct;
+                wrongCountEl.textContent = score.wrong;
+            }
+        }
+
+        function setMode(newMode) {
+            if (currentMode === null) {
+                // First time selecting a mode, reveal the grid container
+                gridContainer.classList.remove('hidden');
+                updateGridBtn.classList.remove('hidden');
+            }
+            
+            currentMode = newMode;
+            
+            [modeShowBtn, modeManualBtn, modeGameBtn].forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`mode-${newMode}`).classList.add('active');
+            
+            resetState();
+            createGrid(); 
+
+            if (newMode === 'show') {
+                instructions.textContent = 'All answers are shown. Change the grid size below.';
+                scoreboard.classList.add('hidden');
+            } else if (newMode === 'manual') {
+                instructions.textContent = 'Click a square, type the answer, and press Enter.';
+                scoreboard.classList.remove('hidden');
+                startTimer();
+            } else if (newMode === 'game') {
+                instructions.textContent = 'Press "Start Game" when you are ready!';
+                scoreboard.classList.add('hidden');
+                startGameBtn.classList.remove('hidden');
+            }
+        }
+
+        function resetState() {
+            stopTimer();
+            seconds = 0;
+            timeEl.textContent = '0s';
+            score = { correct: 0, wrong: 0 };
+            gameCellQueue = [];
+            startGameBtn.classList.add('hidden');
+            if (activeCell) {
+                activeCell.classList.remove('editing', 'game-active');
+                activeCell.contentEditable = false;
+                activeCell = null;
+            }
+        }
+
+        // --- TIMER FUNCTIONS ---
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                seconds++;
+                timeEl.textContent = `${seconds}s`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // --- EVENT LISTENERS ---
+        rowsSlider.addEventListener('input', (e) => {
+            rows = parseInt(e.target.value);
+            rowsValue.textContent = rows;
+        });
+        colsSlider.addEventListener('input', (e) => {
+            cols = parseInt(e.target.value);
+            colsValue.textContent = cols;
+        });
+        
+        updateGridBtn.addEventListener('click', () => {
+            if (currentMode) {
+                setMode(currentMode);
+            }
+        });
+
+        modeShowBtn.addEventListener('click', () => setMode('show'));
+        modeManualBtn.addEventListener('click', () => setMode('manual'));
+        modeGameBtn.addEventListener('click', () => setMode('game'));
+
+        startGameBtn.addEventListener('click', () => {
+            startGameBtn.classList.add('hidden');
+            scoreboard.classList.remove('hidden');
+            instructions.textContent = 'A random square is selected for you. Type the answer!';
+            startTimer();
+            startGameMode();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (/^[0-9]$/.test(e.key) && !activeCell) playTypeErrorSound();
+        });
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            document.body.addEventListener('click', () => Tone.start(), { once: true });
+            // The app now waits for the user to select a mode.
+        };
     </script>
 
 </body>
