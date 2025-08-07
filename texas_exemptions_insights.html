@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Texas K‑12 Vaccination Exemption Insights | 2023‑24</title>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-QPdJBU8kH63yueyPKr6404IB9ZJb4SExXRpYI6ZQx+NOQaPj8GD+2Fe9Vg5nuUrBK4qf2RxCeoEpksRvD0P0A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<style>
+:root{
+  --accent:#0066cc;
+  --danger:#e63946;
+  --private:#5e2d79;
+  --public:#1d3557;
+  --bg:#f5f7fa;
+}
+
+*{box-sizing:border-box}
+body{
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin:0;
+  background-color:var(--bg);
+  color:#333;
+  line-height:1.6;
+}
+header{
+  background-color:var(--accent);
+  color:#fff;
+  padding:1.5rem 2rem;
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  flex-wrap:wrap;
+}
+header h1{margin:0;font-size:1.8rem;font-weight:600}
+section{
+  padding:1.5rem 2rem;
+  max-width:960px;
+  margin:auto;
+}
+section h2{
+  margin:0 0 0.8rem 0;
+  font-size:1.35rem;
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+ul,ol{margin-top:0.4rem;padding-left:1.2rem}
+table{
+  border-collapse:collapse;
+  width:100%;
+  margin-top:0.4rem;
+  font-size:0.95rem;
+}
+th,td{
+  border:1px solid #d0d7de;
+  padding:0.45rem 0.6rem;
+  text-align:left;
+}
+th{background-color:#e9eef4}
+td .bar{
+  position:relative;
+  background-color:var(--accent);
+  height:1rem;
+  border-radius:4px;
+}
+td .bar span{
+  position:absolute;
+  top:-0.15rem;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:0.75rem;
+  color:#111;
+  font-weight:600;
+}
+.outliers .fa-triangle-exclamation{color:var(--danger)}
+.highlight{color:var(--danger);font-weight:700}
+.footer{
+  text-align:center;
+  margin:2rem 0 3rem;
+  font-size:0.9rem;
+}
+.footer a{color:var(--accent);text-decoration:none}
+.footer a:hover{text-decoration:underline}
+@media(max-width:600px){
+  section{padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <i class="fa-solid fa-shield-virus fa-lg"></i>
+  <h1>Texas K‑12 Vaccination Exemption Insights (2023‑24)</h1>
+</header>
+
+<section id="definitions">
+  <h2><i class="fa-solid fa-book-open"></i> Definitions</h2>
+  <ul>
+    <li><strong>ISD</strong> – Independent School District (public)</li>
+    <li><strong>CISD</strong> – Consolidated ISD (public, usually rural)</li>
+    <li><strong>NAUMS</strong> – “University‑Model®” private schools blending classroom &amp; home‑school instruction</li>
+  </ul>
+</section>
+
+<section id="distribution">
+  <h2><i class="fa-solid fa-chart-column"></i> State‑wide distribution (n = 1 693 campuses)</h2>
+  <table>
+    <tr><th>Statistic</th><th>% students filing conscientious exemptions</th></tr>
+    <tr><td><strong>Median</strong></td><td>2.1 %</td></tr>
+    <tr><td>1st–3rd quartile</td><td>0.5 % – 4.2 %</td></tr>
+    <tr><td>Mean</td><td>3.6 %</td></tr>
+    <tr><td>&gt; 5 % (CDC flag)</td><td><div class="bar" style="width:20%"><span>20 %</span></div></td></tr>
+    <tr><td>&gt; 10 %</td><td><div class="bar" style="width:8%"><span>8 %</span></div></td></tr>
+    <tr><td>&gt; 20 %</td><td><div class="bar" style="width:2.5%"><span>2.5 %</span></div></td></tr>
+  </table>
+  <p>The distribution is <em>right‑skewed</em>: most schools sit well below 5 %, but a small tail of high‑exemption campuses drags the mean upward.</p>
+</section>
+
+<section id="outliers" class="outliers">
+  <h2><i class="fa-solid fa-triangle-exclamation"></i> Extreme outliers</h2>
+  <table>
+    <tr><th>Rank</th><th>Campus (county / sector)</th><th>Exemption %</th></tr>
+    <tr><td>1</td><td>Mercy Culture Preparatory Acad. (Tarrant, private)</td><td class="highlight">48.15 %</td></tr>
+    <tr><td>2</td><td>Loop ISD (Gaines, rural public)</td><td class="highlight">47.95 %</td></tr>
+    <tr><td>3</td><td>Faith Academy – Marble Falls (Burnet, NAUMS)</td><td>39.49 %</td></tr>
+    <tr><td>4</td><td>Providence Academy (Rockwall, NAUMS)</td><td>36.36 %</td></tr>
+    <tr><td>5</td><td>Kings Academy Christian (Smith, NAUMS)</td><td>34.93 %</td></tr>
+  </table>
+  <p>All five are small campuses; three belong to the <strong>NAUMS</strong> hybrid‑school network.</p>
+</section>
+
+<section id="sector">
+  <h2><i class="fa-solid fa-school"></i> Sector signal</h2>
+  <table>
+    <tr><th>Metric</th><th>Public (n = 1 124)</th><th>Private (n = 569)</th></tr>
+    <tr><td>Median %</td><td>2.1</td><td>1.6</td></tr>
+    <tr><td>Mean %</td><td>2.7</td><td class="highlight">5.3</td></tr>
+    <tr><td>Campuses &gt; 10 %</td><td><div class="bar" style="background-color:var(--public);width:1.9%"><span>1.9 %</span></div></td><td><div class="bar" style="background-color:var(--private);width:19.9%"><span>19.9 %</span></div></td></tr>
+  </table>
+  <p>Private schools are <strong>10×</strong> more likely to exceed the 10 % threshold, yet their median campus sits slightly below the public median; risk concentrates in a subset of alternative/faith‑based schools.</p>
+</section>
+
+<section id="urban">
+  <h2><i class="fa-solid fa-city"></i> Large urban systems stay low</h2>
+  <ul>
+    <li>Houston ISD – <strong>1.20 %</strong></li>
+    <li>Dallas ISD – <strong>0.83 %</strong></li>
+    <li>Alief ISD (Harris Co.) – <strong>0.48 %</strong></li>
+  </ul>
+  <p>Major metropolitan districts maintain near‑universal coverage, limiting outbreak risk despite their size.</p>
+</section>
+
+<section id="regional">
+  <h2><i class="fa-solid fa-map-location-dot"></i> Regional vulnerability</h2>
+  <p>Killeen ISD (Bell Co.) posts <span class="highlight">25.56 %</span>—exceptionally high for a large public district. Together with Loop ISD and several small CISDs over 15 %, this marks Bell, Gaines, Montague, and Montgomery counties as priority surveillance targets.</p>
+</section>
+
+<section id="policy">
+  <h2><i class="fa-solid fa-lightbulb"></i> Policy implications</h2>
+  <ol>
+    <li><strong>Target the tail.</strong> Roughly 150 high‑exemption schools account for most residual risk; focused outreach would yield the greatest marginal gain.</li>
+    <li><strong>Engage NAUMS &amp; similar hybrids.</strong> Three of the five worst performers share this model.</li>
+    <li><strong>Leverage Catholic / large urban examples.</strong> Many report 0 % exemptions, showing institutional policy can suppress exemption uptake.</li>
+    <li><strong>Monitor military‑adjacent districts.</strong> Killeen ISD’s spike may reflect transient populations and record transfer gaps.</li>
+  </ol>
+</section>
+
+<section id="bottom-line">
+  <h2><i class="fa-solid fa-flag-checkered"></i> Bottom line</h2>
+  <p>Texas K‑12 exemption rates remain generally low but <em>extremely heterogeneous</em>. A small cluster of private hybrid schools and a handful of rural districts create a disproportionate share of vulnerability; precision outreach to those campuses would materially raise the state’s immunization floor without new statewide mandates.</p>
+</section>
+
+<div class="footer">
+  <p><i class="fa-solid fa-link"></i> <a href="https://www.dshs.texas.gov/sites/default/files/LIDS-Immunizations/pdf/2023-2024_K-12_Conscientious_Exemptions_by_District.pdf?fbclid=IwY2xjawMBANlleHRuA2FlbQIxMABicmlkETFCeERyU0FmUFM3d0VtZXBEAR7tKueIyExI_wOi0UAD2V0gq8R4cJxR0xBcF-bGo247OZkPCbnCeQ9e0PNweA_aem_dC9wgKXwsgNYgXniBgh8ZQ" target="_blank" rel="noopener">Raw PDF data (Texas DSHS)</a></p>
+  <p>Generated <span>&#x1F4C5;</span> August 07, 2025</p>
+</div>
+
+</body>
+</html>
