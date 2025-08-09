@@ -79,6 +79,29 @@
             background-color: #4f46e5;
             color: white;
         }
+        /* Dual range slider container to make two inputs look like one slider */
+        .range-container {
+            position: relative;
+            height: 28px;
+        }
+        .range-container input[type="range"] {
+            position: absolute;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: transparent;
+            pointer-events: none; /* let only thumbs receive events */
+        }
+        .range-container input[type="range"]::-webkit-slider-thumb {
+            pointer-events: auto;
+            position: relative;
+            z-index: 2;
+        }
+        .range-container input[type="range"]::-moz-range-thumb {
+            pointer-events: auto;
+            position: relative;
+            z-index: 2;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
@@ -104,6 +127,14 @@
         <div class="text-center">
             <p id="instructions" class="text-center text-gray-600 mb-6">Select a mode to begin.</p>
             <button id="start-game-btn" class="hidden mt-[-1rem] mb-4 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">Start Game</button>
+            <!-- Game options -->
+            <div id="game-options" class="hidden mb-4 flex items-center justify-center gap-3 text-gray-700">
+                <label for="prefill" class="font-medium">Pre-fill:</label>
+                <div class="range-container w-56">
+                    <input type="range" id="prefill" name="prefill" min="0" max="100" step="5" value="0">
+                </div>
+                <span id="prefill-value" class="font-bold tabular-nums">0%</span>
+            </div>
         </div>
 
         <!-- Grid container for the multiplication table -->
@@ -112,17 +143,25 @@
         </div>
 
         <!-- Grid Size Controls -->
-        <div id="size-controls" class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <div class="flex items-center gap-2">
-                <label for="rows" class="font-medium text-gray-700">Rows:</label>
-                <input type="range" id="rows" name="rows" min="2" max="15" value="10" class="w-32 sm:w-48">
-                <span id="rows-value" class="font-bold w-6 text-center">10</span>
+        <div id="size-controls" class="mt-6 flex flex-col items-center justify-center gap-4">
+            <div class="w-full max-w-[32rem] flex flex-row items-center gap-3">
+                <span class="font-medium text-gray-700 shrink-0">Rows:</span>
+                <div class="range-container flex-1">
+                    <input type="range" id="rows-min" name="rows-min" min="0" max="15" value="1">
+                    <input type="range" id="rows" name="rows" min="0" max="15" value="10">
+                </div>
+                <span id="rows-range-value" class="font-bold tabular-nums shrink-0">1–10</span>
             </div>
-            <div class="flex items-center gap-2">
-                <label for="cols" class="font-medium text-gray-700">Cols:</label>
-                <input type="range" id="cols" name="cols" min="2" max="15" value="10" class="w-32 sm:w-48">
-                <span id="cols-value" class="font-bold w-6 text-center">10</span>
+            
+            <div class="w-full max-w-[32rem] flex flex-row items-center gap-3">
+                <span class="font-medium text-gray-700 shrink-0">Cols:</span>
+                <div class="range-container flex-1">
+                    <input type="range" id="cols-min" name="cols-min" min="0" max="15" value="1">
+                    <input type="range" id="cols" name="cols" min="0" max="15" value="10">
+                </div>
+                <span id="cols-range-value" class="font-bold tabular-nums shrink-0">1–10</span>
             </div>
+            
             <button id="update-grid-btn" class="hidden px-5 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">Update</button>
         </div>
     </div>
@@ -136,26 +175,34 @@
         const correctCountEl = document.getElementById('correct-count');
         const wrongCountEl = document.getElementById('wrong-count');
         const leftCountEl = document.getElementById('left-count');
+        const rowsMinSlider = document.getElementById('rows-min');
         const rowsSlider = document.getElementById('rows');
+        const colsMinSlider = document.getElementById('cols-min');
         const colsSlider = document.getElementById('cols');
-        const rowsValue = document.getElementById('rows-value');
-        const colsValue = document.getElementById('cols-value');
+        const rowsRangeValue = document.getElementById('rows-range-value');
+        const colsRangeValue = document.getElementById('cols-range-value');
         const modeShowBtn = document.getElementById('mode-show');
         const modeManualBtn = document.getElementById('mode-manual');
         const modeGameBtn = document.getElementById('mode-game');
         const startGameBtn = document.getElementById('start-game-btn');
+        const gameOptions = document.getElementById('game-options');
+        const prefillSlider = document.getElementById('prefill');
+        const prefillValue = document.getElementById('prefill-value');
         const sizeControls = document.getElementById('size-controls');
         const updateGridBtn = document.getElementById('update-grid-btn');
 
         // --- STATE VARIABLES ---
         let activeCell = null;
         let currentMode = null; // 'show', 'manual', 'game'
-        let rows = 10;
-        let cols = 10;
+        let minRow = 1;
+        let rows = 10; // max row
+        let minCol = 1;
+        let cols = 10; // max col
         let score = { correct: 0, wrong: 0 };
         let timerInterval = null;
         let seconds = 0;
         let gameCellQueue = [];
+        let prefillPercent = 0;
 
         // --- SOUND PLAYER FUNCTIONS (Tone.js) ---
         function playCorrectSound() {
@@ -198,23 +245,28 @@
                 activeCell.classList.remove('editing', 'game-active');
                 activeCell = null;
             }
-            gridContainer.style.gridTemplateColumns = `repeat(${cols + 1}, minmax(0, 1fr))`;
+            const numRows = rows - minRow + 1;
+            const numCols = cols - minCol + 1;
+            gridContainer.style.gridTemplateColumns = `repeat(${numCols + 1}, minmax(0, 1fr))`;
 
-            for (let i = 0; i <= rows; i++) {
-                for (let j = 0; j <= cols; j++) {
+            for (let iIndex = 0; iIndex <= numRows; iIndex++) {
+                for (let jIndex = 0; jIndex <= numCols; jIndex++) {
                     const cell = document.createElement('div');
                     cell.classList.add('cell', 'border', 'rounded-md');
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
+                    cell.dataset.row = iIndex;
+                    cell.dataset.col = jIndex;
 
-                    if (i === 0 && j === 0) {
+                    if (iIndex === 0 && jIndex === 0) {
                         cell.classList.add('header');
                         cell.textContent = '×';
-                    } else if (i === 0 || j === 0) {
+                    } else if (iIndex === 0 || jIndex === 0) {
                         cell.classList.add('header');
-                        cell.textContent = i || j;
+                        const headerValue = (iIndex === 0) ? (minCol + jIndex - 1) : (minRow + iIndex - 1);
+                        cell.textContent = headerValue;
                     } else {
-                        cell.dataset.value = i * j;
+                        const rowValue = minRow + iIndex - 1;
+                        const colValue = minCol + jIndex - 1;
+                        cell.dataset.value = rowValue * colValue;
                         cell.classList.add('quiz-cell');
                         if (currentMode === 'show') {
                             cell.textContent = cell.dataset.value;
@@ -380,14 +432,17 @@
             if (newMode === 'show') {
                 instructions.textContent = 'All answers are shown. Change the grid size below.';
                 scoreboard.classList.add('hidden');
+                gameOptions.classList.add('hidden');
             } else if (newMode === 'manual') {
                 instructions.textContent = 'Click a square, type the answer, and press Enter.';
                 scoreboard.classList.remove('hidden');
+                gameOptions.classList.add('hidden');
                 startTimer();
             } else if (newMode === 'game') {
                 instructions.textContent = 'Press "Start Game" when you are ready!';
                 scoreboard.classList.add('hidden');
                 startGameBtn.classList.remove('hidden');
+                gameOptions.classList.remove('hidden');
             }
         }
 
@@ -398,6 +453,7 @@
             score = { correct: 0, wrong: 0 };
             gameCellQueue = [];
             startGameBtn.classList.add('hidden');
+            gameOptions.classList.add('hidden');
             if (activeCell) {
                 activeCell.classList.remove('editing', 'game-active');
                 activeCell.contentEditable = false;
@@ -420,13 +476,50 @@
         }
 
         // --- EVENT LISTENERS ---
+        const updateRowRangeLabel = () => {
+            rowsRangeValue.textContent = `${minRow}\u2013${rows}`;
+        };
+        const updateColRangeLabel = () => {
+            colsRangeValue.textContent = `${minCol}\u2013${cols}`;
+        };
+
+        rowsMinSlider.addEventListener('input', (e) => {
+            minRow = parseInt(e.target.value);
+            if (minRow > rows) {
+                rows = minRow;
+                rowsSlider.value = rows;
+            }
+            updateRowRangeLabel();
+        });
         rowsSlider.addEventListener('input', (e) => {
             rows = parseInt(e.target.value);
-            rowsValue.textContent = rows;
+            if (rows < minRow) {
+                minRow = rows;
+                rowsMinSlider.value = minRow;
+            }
+            updateRowRangeLabel();
+        });
+        colsMinSlider.addEventListener('input', (e) => {
+            minCol = parseInt(e.target.value);
+            if (minCol > cols) {
+                cols = minCol;
+                colsSlider.value = cols;
+            }
+            updateColRangeLabel();
         });
         colsSlider.addEventListener('input', (e) => {
             cols = parseInt(e.target.value);
-            colsValue.textContent = cols;
+            if (cols < minCol) {
+                minCol = cols;
+                colsMinSlider.value = minCol;
+            }
+            updateColRangeLabel();
+        });
+
+        // Game options events
+        prefillSlider.addEventListener('input', (e) => {
+            prefillPercent = parseInt(e.target.value);
+            prefillValue.textContent = `${prefillPercent}%`;
         });
         
         updateGridBtn.addEventListener('click', () => {
@@ -439,11 +532,31 @@
         modeManualBtn.addEventListener('click', () => setMode('manual'));
         modeGameBtn.addEventListener('click', () => setMode('game'));
 
+        function prefillGrid(percentage) {
+            const cells = Array.from(document.querySelectorAll('.quiz-cell:not(.revealed)'));
+            const total = cells.length;
+            const count = Math.floor(total * (percentage / 100));
+            if (count <= 0) return;
+            const shuffled = cells.sort(() => Math.random() - 0.5);
+            const toReveal = shuffled.slice(0, count);
+            for (const cell of toReveal) {
+                const value = parseInt(cell.dataset.value);
+                cell.textContent = value;
+                if (!cell.classList.contains('revealed')) {
+                    cell.classList.add('revealed');
+                    score.correct++;
+                }
+            }
+            updateScoreboard();
+        }
+
         startGameBtn.addEventListener('click', () => {
             startGameBtn.classList.add('hidden');
             scoreboard.classList.remove('hidden');
             instructions.textContent = 'A random square is selected for you. Type the answer!';
             startTimer();
+            // Pre-fill the grid based on selected percentage
+            prefillGrid(prefillPercent);
             startGameMode();
         });
 
@@ -455,6 +568,10 @@
         window.onload = () => {
             document.body.addEventListener('click', () => Tone.start(), { once: true });
             // The app now waits for the user to select a mode.
+            // Initialize combined range labels
+            rowsRangeValue.textContent = `${minRow}\u2013${rows}`;
+            colsRangeValue.textContent = `${minCol}\u2013${cols}`;
+            prefillValue.textContent = `${prefillPercent}%`;
         };
     </script>
 
