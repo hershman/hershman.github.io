@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stay in Leander, TX • Airbnbs + Attractions Guide</title>
+    <meta name="description" content="Plan your Hill Country getaway. Book a stay near Leander, TX and explore nature, family fun, wineries, sports, and more within 20 miles." />
+    <meta property="og:title" content="Stay in Leander, TX • Airbnbs + Attractions Guide" />
+    <meta property="og:description" content="Book one of our featured Airbnbs and explore the best attractions within 20 miles of Leander, Texas." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#dc3545" />
+    <style>
+      :root {
+        --bg: #0d1117;
+        --soft: #1c2128;
+        --text: #f0f6fc;
+        --muted: #adb5bd;
+        --brand: #dc3545;
+        --brand-2: #b02a37;
+        --accent: #ffc107;
+        --blue: #0d6efd;
+        --blue-2: #0a58ca;
+        --ring: rgba(220,53,69,0.4);
+        --shadow: rgba(0,0,0,0.5);
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        color: var(--text);
+        background: radial-gradient(1200px 800px at 80% -10%, rgba(220,53,69,0.12), transparent 60%),
+                    radial-gradient(1000px 700px at 10% -20%, rgba(13,110,253,0.10), transparent 60%),
+                    linear-gradient(180deg, #0d1117, #0d1117 240px, #161b22);
+        font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      a { color: var(--brand); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+
+      .container { width: min(1120px, 92vw); margin: 0 auto; }
+      header.nav {
+        position: sticky; top: 0; z-index: 20;
+        background: rgba(11,15,20,0.8);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+      .brand { display: flex; gap: 10px; align-items: center; font-weight: 700; letter-spacing: 0.2px; }
+      .brand-mark { width: 28px; height: 28px; border-radius: 8px; background:
+        conic-gradient(from 210deg at 50% 50%, var(--brand) 0 33%, #ffffff 33% 66%, var(--blue) 66% 100%);
+        box-shadow: 0 8px 28px -12px var(--ring), inset 0 0 0 1px rgba(255,255,255,0.08);
+      }
+      nav a { color: var(--muted); margin-left: 18px; }
+      nav a:hover { color: var(--text); }
+
+      .hero { padding: 56px 0 28px; position: relative; overflow: hidden; }
+      .hero .grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center; }
+      .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 999px; background: rgba(220,53,69,0.16); color: #ffb3ba; font-size: 12px; letter-spacing: 0.4px; text-transform: uppercase; }
+      h1 { margin: 10px 0 8px; font-size: clamp(28px, 4.6vw, 44px); line-height: 1.18; letter-spacing: 0.2px; }
+      .lead { color: var(--muted); font-size: 18px; }
+      .cta-row { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+      .btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); color: var(--text); background: linear-gradient(180deg, rgba(220,53,69,0.22), rgba(220,53,69,0.06)); box-shadow: 0 10px 26px -14px var(--ring), inset 0 0 0 1px rgba(255,255,255,0.06); }
+      .btn.secondary { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color: var(--muted); }
+      .hero-panel { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding: 18px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 16px 40px -24px var(--shadow); }
+      .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+      .badge { font-size: 12px; color: var(--muted); padding: 6px 10px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 999px; }
+
+      section { padding: 26px 0; }
+      .section-title { font-size: 24px; margin: 0 0 14px; }
+      .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 900px) { .hero .grid { grid-template-columns: 1fr; } .cards { grid-template-columns: 1fr; } }
+      .card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; box-shadow: 0 16px 44px -24px var(--shadow); display: flex; flex-direction: column; }
+      .card-media { aspect-ratio: 16/10; background: linear-gradient(135deg, rgba(30,200,176,0.18), rgba(38,166,154,0.08)); position: relative; display: grid; place-items: center; }
+      .card-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .card-body { padding: 14px; display: grid; gap: 8px; }
+      .card h3 { margin: 0; font-size: 18px; }
+      .card p { margin: 0; color: var(--muted); font-size: 14px; }
+      .card .actions { display: flex; gap: 10px; margin-top: 8px; }
+
+      /* Variants for the booking section cards */
+      .card.variant-1 .card-media { background: linear-gradient(135deg, rgba(220,53,69,0.18), rgba(176,42,55,0.08)); }
+      .card.variant-2 .card-media { background: linear-gradient(135deg, rgba(13,110,253,0.15), rgba(10,88,202,0.08)); }
+      .card.variant-3 .card-media { background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,193,7,0.08)); }
+
+      .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      @media (max-width: 900px) { .why { grid-template-columns: 1fr; } }
+      .why .item { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px; }
+      .why .item h4 { margin: 0 0 6px; font-size: 16px; }
+      .why .item p { margin: 0; color: var(--muted); font-size: 14px; }
+
+      .guide { background: #0c1219; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .prose { color: var(--text); }
+      .prose h2, .prose h3 { margin-top: 20px; }
+      .prose h2 { font-size: 22px; }
+      .prose h3 { font-size: 18px; }
+      .prose p { color: #d6dee8; }
+      .prose a { color: #8af4e5; }
+      .prose ul { padding-left: 20px; }
+      .toc { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+      .toc a { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 8px 10px; border-radius: 999px; color: var(--muted); font-size: 13px; text-decoration: none; }
+      .toc a:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+
+      /* Guide carousel */
+      .guide-carousel { position: relative; }
+      .carousel-nav { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; }
+      .carousel-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color: var(--muted); cursor: pointer; transition: all 0.2s ease; }
+      .carousel-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.18); background: linear-gradient(180deg, rgba(220,53,69,0.12), rgba(220,53,69,0.04)); }
+      .carousel-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+      .carousel-btn:disabled:hover { color: var(--muted); border-color: rgba(255,255,255,0.08); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); }
+      .carousel-indicator { display: flex; gap: 8px; align-items: center; }
+      .indicator-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); cursor: pointer; transition: all 0.2s ease; }
+      .indicator-dot.active { background: var(--brand); width: 12px; height: 12px; }
+      .carousel-container { overflow: hidden; border-radius: 16px; }
+      .carousel-track { display: flex; transition: transform 0.4s ease; }
+      .carousel-slide { min-width: 100%; flex: 0 0 100%; }
+      
+      /* Guide cards and collapsible attractions */
+      .category-card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; box-shadow: 0 16px 44px -24px var(--shadow); height: 600px; display: flex; flex-direction: column; }
+      .category-head { display: flex; align-items: center; justify-content: space-between; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.06); flex: 0 0 auto; }
+      .category-head h3 { margin: 0; font-size: 18px; }
+      .category-body { padding: 8px; flex: 1; overflow-y: auto; }
+      .attraction { border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: rgba(255,255,255,0.02); margin: 8px; overflow: hidden; }
+      .attraction-summary { display: grid; gap: 4px; padding: 12px; cursor: pointer; }
+      .attraction-summary:hover { background: rgba(255,255,255,0.03); }
+      .attraction-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .attraction-title h4 { margin: 0; font-size: 16px; }
+      .summary-text { color: var(--muted); font-size: 14px; }
+      .chevron { width: 18px; height: 18px; flex: 0 0 18px; transition: transform 0.2s ease; opacity: 0.9; }
+      .attraction[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+      .attraction-details { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; border-top: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.015); }
+      .attraction-details-inner { padding: 12px; }
+
+      .booking-hero { background: linear-gradient(135deg, rgba(13,110,253,0.08), rgba(10,88,202,0.04)); border-radius: 20px; padding: 32px; margin-bottom: 24px; position: relative; overflow: hidden; }
+      .booking-hero::before { content: ""; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(255,193,7,0.15), transparent 70%); border-radius: 50%; }
+      .booking-hero h2 { margin: 0 0 8px; font-size: 28px; }
+      .booking-hero p { margin: 0; color: var(--muted); font-size: 16px; }
+
+      footer { color: var(--muted); padding: 26px 0 40px; }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="container nav-inner">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div>Leander Hill Country Stays</div>
+        </div>
+        <nav>
+          <a href="#stays">Stays</a>
+          <a href="#why">Why here</a>
+          <a href="#guide">Attractions</a>
+          <a href="#book">Book</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container">
+        <div class="grid">
+          <div>
+            <div class="eyebrow">Leander • Lake Travis • Hill Country</div>
+            <h1>Your Hill Country getaway near Lake Travis</h1>
+            <p class="lead">Stay in comfort near Leander, TX and explore caves, lakes, wineries, trails, concerts, and family fun — all within about 20 miles.</p>
+            <div class="cta-row">
+              <a class="btn" href="#stays">View featured Airbnbs</a>
+              <a class="btn secondary" href="#guide">See the attractions guide</a>
+            </div>
+            <div style="height:12px"></div>
+            <div class="badges">
+              <span class="badge">Near Lake Travis</span>
+              <span class="badge">Family friendly</span>
+              <span class="badge">Great for weekend trips</span>
+            </div>
+          </div>
+          <div class="hero-panel">
+            <div style="display:grid; gap:10px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:12px; height:12px; border-radius:50%; background:var(--brand);"></div>
+                <strong>What's close by?</strong>
+              </div>
+              <div style="display:grid; gap:8px; color:var(--muted); font-size:14px;">
+                <div>• Lake Travis parks and beaches</div>
+                <div>• Inner Space Cavern cave tours</div>
+                <div>• Winery tastings and live music</div>
+                <div>• H-E-B Center events and sports</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stays">
+      <div class="container">
+        <h2 class="section-title">Featured Airbnbs</h2>
+        <div class="cards">
+          <article class="card">
+            <div class="card-media">
+              <img loading="lazy" alt="Big and Private Austin Hill Country Retreat exterior or interior photo" src="https://a0.muscache.com/im/pictures/2f66ffa9-71eb-4db7-b8ec-072e96bbdfac.jpg?im_w=720&width=720&quality=70&auto=webp" />
+            </div>
+            <div class="card-body">
+              <h3>Home in Leander · ★4.91 · 3 bedrooms · 4 beds · 2.5 baths</h3>
+              <p>Big and Private Austin Hill Country Retreat</p>
+              <div class="actions">
+                <a class="btn" rel="noopener noreferrer nofollow" target="_blank" href="https://www.airbnb.com/rooms/741397683847553118">View listing</a>
+                <a class="btn secondary" href="#guide">See things to do</a>
+              </div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-media">
+              <img loading="lazy" alt="2 homes on 4 acres for all y'all — Airbnb photo" src="https://a0.muscache.com/im/pictures/miso/Hosting-1451089343406554388/original/38ddf4cf-c5fa-4b41-9e2f-1434d86eaddb.jpeg?im_w=720&width=720&quality=70&auto=webp" />
+            </div>
+            <div class="card-body">
+              <h3>Home in Leander · ★New · 7 bedrooms · 10 beds · 4.5 baths</h3>
+              <p>2 homes on 4 acres for all y'all</p>
+              <div class="actions">
+                <a class="btn" rel="noopener noreferrer nofollow" target="_blank" href="https://www.airbnb.com/rooms/1451089343406554388">View listing</a>
+                <a class="btn secondary" href="#why">Why stay here</a>
+              </div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-media">
+              <img loading="lazy" alt="Hill Country Estate with acreage and games — Airbnb photo" src="https://a0.muscache.com/im/pictures/miso/Hosting-1447058851706441447/original/8582e085-10ba-40f1-a288-1d3acbff20c2.jpeg?im_w=720&width=720&quality=70&auto=webp" />
+            </div>
+            <div class="card-body">
+              <h3>Home in Leander · ★New · 4 bedrooms · 6 beds · 2 baths</h3>
+              <p>Hill Country Estate | 3 King Bed • Acreage • Games</p>
+              <div class="actions">
+                <a class="btn" rel="noopener noreferrer nofollow" target="_blank" href="https://www.airbnb.com/rooms/1447058851706441447">View listing</a>
+                <a class="btn secondary" href="#book">Availability</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="why">
+      <div class="container">
+        <h2 class="section-title">Why this area</h2>
+        <div class="why">
+          <div class="item">
+            <h4>Nature in every direction</h4>
+            <p>Lake coves, trails, caverns, and wildlife preserves are an easy drive.</p>
+          </div>
+          <div class="item">
+            <h4>Made for families and groups</h4>
+            <p>Waterparks, zip lines, trains, sports, and kid-friendly museums.</p>
+          </div>
+          <div class="item">
+            <h4>Wine, beer, music</h4>
+            <p>Wineries and breweries with patios, plus concerts at H‑E‑B Center.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="guide" class="guide">
+      <div class="container">
+        <h2 class="section-title">Leander Area Attractions Guide</h2>
+        <div class="toc" id="toc" aria-label="Table of contents"></div>
+        <div class="guide-carousel">
+          <div class="carousel-nav">
+            <button class="carousel-btn" id="prev-btn" aria-label="Previous category">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+            </button>
+            <div class="carousel-indicator" id="carousel-indicator"></div>
+            <button class="carousel-btn" id="next-btn" aria-label="Next category">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
+          <div class="carousel-container">
+            <div class="carousel-track" id="carousel-track"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="book">
+      <div class="container">
+        <div class="booking-hero">
+          <h2>Ready to book your stay?</h2>
+          <p>Choose from our handpicked Airbnb properties, each offering unique comfort and convenience for exploring the Hill Country.</p>
+        </div>
+        <div class="cards">
+          <article class="card variant-1">
+            <div class="card-media">
+              <img loading="lazy" alt="Big and Private Austin Hill Country Retreat exterior or interior photo" src="https://a0.muscache.com/im/pictures/2f66ffa9-71eb-4db7-b8ec-072e96bbdfac.jpg?im_w=720&width=720&quality=70&auto=webp" />
+            </div>
+            <div class="card-body">
+              <h3>Home in Leander · ★4.91 · 3 bedrooms · 4 beds · 2.5 baths</h3>
+              <p>Big and Private Austin Hill Country Retreat</p>
+              <div class="actions">
+                <a class="btn" rel="noopener noreferrer nofollow" target="_blank" href="https://www.airbnb.com/rooms/741397683847553118">Book now on Airbnb</a>
+              </div>
+            </div>
+          </article>
+          <article class="card variant-2">
+            <div class="card-media">
+              <img loading="lazy" alt="2 homes on 4 acres for all y'all — Airbnb photo" src="https://a0.muscache.com/im/pictures/miso/Hosting-1451089343406554388/original/38ddf4cf-c5fa-4b41-9e2f-1434d86eaddb.jpeg?im_w=720&width=720&quality=70&auto=webp" />
+            </div>
+            <div class="card-body">
+              <h3>Home in Leander · ★New · 7 bedrooms · 10 beds · 4.5 baths</h3>
+              <p>2 homes on 4 acres for all y'all</p>
+              <div class="actions">
+                <a class="btn" rel="noopener noreferrer nofollow" target="_blank" href="https://www.airbnb.com/rooms/1451089343406554388">Book now on Airbnb</a>
+              </div>
+            </div>
+          </article>
+          <article class="card variant-3">
+            <div class="card-media">
+              <img loading="lazy" alt="Hill Country Estate with acreage and games — Airbnb photo" src="https://a0.muscache.com/im/pictures/miso/Hosting-1447058851706441447/original/8582e085-10ba-40f1-a288-1d3acbff20c2.jpeg?im_w=720&width=720&quality=70&auto=webp" />
+            </div>
+            <div class="card-body">
+              <h3>Home in Leander · ★New · 4 bedrooms · 6 beds · 2 baths</h3>
+              <p>Hill Country Estate | 3 King Bed • Acreage • Games</p>
+              <div class="actions">
+                <a class="btn" rel="noopener noreferrer nofollow" target="_blank" href="https://www.airbnb.com/rooms/1447058851706441447">Book now on Airbnb</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <div>© <span id="y"></span> Leander Hill Country Stays</div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script id="leander-md" type="text/markdown">
+# Attractions within 20 Miles of Leander, Texas
+
+Leander, TX is surrounded by a diverse array of attractions, from scenic parks and historic sites to family-friendly entertainment venues and wineries. Below is a comprehensive database of attractions within approximately a 20-mile radius of Leander, organized by category. Each listing includes key information such as location, contact details, operating hours, facilities, and other relevant details.
+
+## Nature & Outdoor Attractions
+
+### Balcones Canyonlands National Wildlife Refuge (Doeskin Ranch & Warbler Vista)
+
+* **Type/Subcategory:** Wildlife refuge – Hill country nature preserve (birding, hiking trails)
+* **Description:** A protected habitat known for its rugged limestone hills and as a haven for the endangered Golden-cheeked Warbler. Visitors can hike scenic trails (e.g., Doeskin Ranch trail) to spot diverse wildlife and enjoy panoramic views of Texas Hill Country.
+* **Location:** Doeskin Ranch Trailhead – 10645 S FM 1174, Bertram, TX 78605 (approx. 15 miles NW of Leander)
+* **Coordinates:** 30.680° N, 98.118° W (approximate center of refuge)
+* **Contact:** (512) 339-9432 (Refuge HQ) – *No email; official info via U.S. Fish & Wildlife Service*
+* **Website:** [fws.gov/refuge/balcones_canyonlands](https://www.fws.gov/refuge/balcones-canyonlands)
+* **Hours:** Outdoor trails open daily sunrise to sunset (no entry fee)
+* **Facilities:** Small parking areas at trailheads, trail maps, no on-site restrooms or food (carry water). **Accessibility:** Natural unpaved trails (not wheelchair accessible).
+* **Safety:** Visitors should stay on marked trails; beware of uneven terrain, heat, and wildlife. No pets (to protect wildlife). Photography allowed for personal use.
+
+### Lake Travis North Shore Parks (Sandy Creek, Jones Brothers, Cypress Creek)
+
+* **Type/Subcategory:** Public lake parks – Waterfront recreation areas (swimming, boating, picnics)
+* **Description:** Several parks on the north shore of Lake Travis offer lake access and outdoor fun. **Sandy Creek Park** – a 92-acre hidden gem with swimming coves, nature trails, fishing spots, and birding opportunities. **Jones Brothers Park** (Jonestown) – features boat ramps, beaches, playgrounds and sports courts. **Cypress Creek Park** – a smaller lakeside park great for picnics, boating and fishing. All provide a chance to bask in blue lake waters and hill country scenery.
+* **Locations:**
+
+  * *Sandy Creek Park:* 9500 Lime Creek Rd, Leander, TX 78641 (in Volente)
+  * *Jones Brothers Park:* 10301 Lakeside Dr, Jonestown, TX 78645
+  * *Cypress Creek Park:* 13601 Bullick Hollow Rd, Austin, TX 78726
+* **Coordinates:** Sandy Creek Park (approx. 30.490° N, 97.917° W)
+* **Hours:** Generally 7:00 AM – civil sunset (seasonal variations). Summer months open daily; some parks may have winter weekday closures.
+* **Admission:** Sandy Creek & Cypress Creek (Travis County parks) have a vehicle entry fee (around $5-$10 per car in summer). Jones Brothers Park is free for day use.
+* **Facilities:** Parking lots (limited capacity on peak days), boat ramps (all three parks), picnic tables, BBQ grills, children’s play areas (Jones Brothers), restrooms (vault toilets). No on-site concessions (bring food/drinks).
+* **Accessibility:** Portions of parks (parking, some picnic areas) are accessible, but lake shorelines are natural terrain.
+* **Safety:** **Swimming is at your own risk** – no lifeguards on duty. Watch for fluctuating lake levels and shallow areas. Pets allowed on leash. Alcohol is typically prohibited.
+
+### Devine Lake Park
+
+* **Type/Subcategory:** City park – Lakeside community park (fishing, trails)
+* **Description:** A tranquil 45-acre park centered around Devine Lake, offering a peaceful retreat for fishing, non-motorized boating, and wildlife observation. The park features open green space and gentle trails perfect for walking or jogging, as well as a playscape for children.
+* **Location:** 1807 Waterfall Ave, Leander, TX 78641
+* **Coordinates:** ~30.578° N, 97.866° W
+* **Hours:** Daily 6:00 AM – 10:00 PM (Leander city park hours)
+* **Admission:** Free entry and parking
+* **Facilities:** Parking lot, shoreline fishing access, **pavilion** (group pavilion available for rent), picnic tables, playground, walking trails. No permanent restrooms (portable toilets on-site).
+* **Accessibility:** Pavilion and playground are accessible; trails are unpaved but mostly flat.
+* **Pet Policy:** Dogs allowed on leash.
+* **Estimated Visit Duration:** 1–2 hours for a leisurely visit or picnic.
+
+### Brushy Creek Lake Park
+
+* **Type/Subcategory:** County park – Recreation area with lake and trails
+* **Description:** A popular 90-acre park along Brushy Creek, featuring a small lake for kayaking/fishing, extensive hike & bike trails, a splash pad and playground, and open fields. Great for family outings and fitness activities.
+* **Location:** 3300 Brushy Creek Rd, Cedar Park, TX 78613
+* **Hours:** 7:00 AM – 10:00 PM daily
+* **Facilities:** Large parking lots, restrooms, drinking fountains, **splash pad** (summer), picnic pavilions, exercise stations, 38-acre lake with fishing pier, canoe/kayak launch. Connects to the regional **Brushy Creek Trail** (10+ miles paved trail).
+* **Accessibility:** Paved trails suitable for wheelchairs/strollers, accessible restroom facilities.
+* **Safety:** Helmets recommended for cyclists on trails; supervise children near water and playground.
+
+### Southwest Williamson County Regional Park
+
+* **Type/Subcategory:** Regional park – Sports and outdoor recreation complex
+* **Description:** A 800-acre park offering a bit of everything – from athletic facilities (soccer, football, baseball fields) to a **mini train ride** (Cedar Rock Railroad) and the *Quarry Splash Pad*. A miniature train traverses the park’s scenic areas. Families can enjoy playgrounds, hiking trails, and open space for kite flying or relaxation.
+* **Location:** 3005 Co Rd 175, Leander, TX 78641 (just off FM 1431)
+* **Hours:** 7:30 AM – 10:00 PM (daily) for general park; splash pad and train have specific hours (seasonal).
+* **Admission:** Park entry is free. Splash pad ~$2 per child. Train ride ~$5 per person.
+* **Facilities:** Ample parking, restrooms, concession stands (during events), picnic tables, **disc golf course**, **tennis courts**, **basketball court**, **playground** and **walking/jogging trails**. The **Cedar Rock Railroad** (a 1/4-scale train) operates on weekends seasonally.
+* **Accessibility:** Paved paths and ramps to facilities; train has accessible coaches.
+* **Child-Friendly:** Extremely – multiple play areas and water features.
+* **Pet Policy:** Dogs on leash are allowed (except on athletic fields).
+
+### Inner Space Cavern
+
+* **Type/Subcategory:** Natural attraction – Limestone cavern (guided cave tours)
+* **Description:** A well-preserved karst cave discovered in 1963 during highway construction. Inner Space features stunning underground formations (stalactites, stalagmites), large chambers, and prehistoric animal fossils. Guided walking tours take visitors on an awe-inspiring journey **about 69 feet underground**, showcasing 10,000-year-old cave formations.
+* **Location:** 4200 S I-35 Frontage Rd, Georgetown, TX 78626 (junction of I-35 and SH-45)
+* **Coordinates:** 30.60778° N, 97.68778° W
+* **Contact:** (512) 931-2283; [info@innerspacecavern.com](mailto:info@innerspacecavern.com)
+* **Website:** [innerspacecavern.com](https://innerspacecavern.com)
+* **Hours:** Open daily. Typical hours 9:00 AM – 5:00 PM (extended to 6:00 PM in summer). Closed Thanksgiving and Christmas. Tours depart roughly every 30–45 minutes.
+* **Admission:** Guided tour tickets required (Adult ~$25; Child ~$15 for standard tour). Specialty adventure tours (wild cave spelunking) available by reservation (higher cost). On-site ticket purchase only (no online booking).
+* **Facilities:** Visitor center with **gift shop**, snack bar, picnic area, restrooms. Free parking on-site.
+* **Accessibility:** The standard tour path is a paved, lit walkway, moderately strenuous (some inclines). Not fully wheelchair accessible due to steep grades – however, a modified accessible tour may be offered (call ahead).
+* **Estimated Visit Duration:** ~1.5 hours (1 hour tour plus exhibit browsing).
+* **Safety:** Cave temperature ~72°F year-round. Comfortable walking shoes recommended (can be wet/slippery). Photography is allowed (no tripods). Children must be supervised.
+* **Reviews & Ratings:** Very highly rated – **4.7/5** on Google (≈6,450 reviews) – praised as an “exceptional” cave experience for all ages.
+
+### Blue Hole Park (Georgetown)
+
+* **Type/Subcategory:** Natural swimming hole – Scenic lagoon on the San Gabriel River
+* **Description:** A picturesque *blue-green* swimming hole formed by the South Fork of the San Gabriel River, surrounded by limestone bluffs. This natural pool is a popular summer spot for wading, swimming, and picnicking along the shady banks. Adjacent trails connect to Georgetown’s San Gabriel Park.
+* **Location:** 100 Blue Hole Park, Georgetown, TX 78626 (near downtown Georgetown)
+* **Hours:** 6:00 AM – 10:00 PM daily (summer season for swimming is typically May–Sept).
+* **Admission:** Free entry.
+* **Facilities:** Parking at nearby trailhead, paved path to the river, picnic tables, and trash cans. **No lifeguards** (swim at your own risk). No restrooms on-site (nearest facilities at San Gabriel Park).
+* **Accessibility:** The overlook is accessible; the path down to water is rocky and not wheelchair-friendly.
+* **Safety:** Water depth varies; exercise caution on slippery rocks. Glass containers and alcohol are prohibited.
+
+### Leander Dinosaur Tracks
+
+* **Type/Subcategory:** Paleontological site – Fossilized dinosaur footprint site
+* **Description:** A set of **prehistoric dinosaur footprints** preserved in the bed of the South San Gabriel River, offering a glimpse into Texas’s distant past. The site, often called the Leander Dinosaur Tracks, features several **three-toed** tracks likely from an Acrocanthosaurus (Early Cretaceous period). It is an undeveloped natural site – there are no signs or facilities, but adventurous visitors can seek out the distinct imprints along the riverbed when water levels are low.
+* **Location:** Along the South San Gabriel River, near 601 S. Gabriel Dr, Leander, TX 78641 (behind an apartment complex at Hwy 183 and S. Gabriel Drive). A short hike from the parking area by the bridge is required to reach the riverbed.
+* **Access:** Open 24/7 (outdoor site on public land). Best viewed during dry periods when river flow is low. **No formal entrance or signage** – use GPS to find the general area.
+* **Admission:** Free.
+* **Facilities:** None on-site. Park along the road shoulder near trail access.
+* **What to Bring:** Sturdy shoes that can get wet, and perhaps a stick or soft brush to gently outline tracks.
+* **Safety:** **Exercise caution** on uneven, algae-slick rocks in the river. Do not attempt after heavy rains (submerged and dangerous). Respect the site – do not damage or remove any fossils.
+* **Historical Significance:** Part of the Glen Rose Formation, these footprints are over 100 million years old, making this spot a meaningful paleontological treasure in the Leander area.
+
+## Museums & Historic Sites
+
+### Williamson Museum (Georgetown)
+
+* **Type/Subcategory:** History museum – County heritage museum
+* **Description:** The Williamson Museum showcases the rich history and culture of Williamson County. Housed in a historic building on Georgetown’s downtown square, it features exhibits on Native American artifacts, pioneer life, the Chisholm Trail, and local history spanning the 19th and 20th centuries. Interactive displays and guided tours engage visitors of all ages.
+* **Location:** 716 S. Austin Ave, Georgetown, TX 78626
+* **Contact:** (512) 943-1670; [info@williamsonmuseum.org](mailto:info@williamsonmuseum.org)
+* **Website:** [williamsonmuseum.org](https://www.williamsonmuseum.org)
+* **Hours:** Wed–Fri 12:00 PM – 5:00 PM; Sat 10:00 AM – 5:00 PM; Sun–Tue closed. (Free admission; donations welcome.)
+* **Facilities:** Small gift shop, research archives by appointment. Street parking available.
+* **Accessibility:** Fully wheelchair accessible (single floor).
+* **Special Programs:** Hosts **First Friday** events, educational programs, and walking tours of Georgetown’s historic square.
+
+### Cedar Park Heritage Oak & Heritage Oak Park
+
+* **Type/Subcategory:** Historic tree & city park – Iconic live oak with seasonal display
+* **Description:** The “Heritage Oak” of Cedar Park is a majestic live oak tree estimated over 400 years old. It has become a beloved historic landmark and symbol of resilience in the community. Each December, the tree is ceremoniously lit with thousands of lights, drawing visitors for a festive display. The surrounding Heritage Oak Park offers a small playground and benches under the sprawling branches, making it a pleasant spot to relax and reflect beneath a living piece of history.
+* **Location:** 875 Quest Pkwy, Cedar Park, TX 78613
+* **Hours:** 7:00 AM – 10:00 PM daily
+* **Admission:** Free
+* **Facilities:** Walking path, interpretive plaque about the oak, playground, picnic tables. No restrooms on-site.
+* **Historical Note:** The tree pre-dates the founding of Cedar Park and has witnessed centuries of regional history. The city’s annual **Holiday Tree Lighting** event takes place here (late Nov/early Dec).
+
+### Austin Steam Train Association & Cedar Park Depot (Hill Country Flyer)
+
+* **Type/Subcategory:** Heritage railroad museum & excursion – Vintage train rides
+* **Description:** **Austin Steam Train Association (ASTA)** operates the Hill Country Flyer and other historic train rides departing from the 1912 Cedar Park Depot. Visitors can step aboard beautifully restored vintage train cars, including steam-era coaches, for a journey through the Texas Hill Country. The **Hill Country Flyer** is a 66-mile round trip from Cedar Park to Burnet, TX, offering riders historic narration and scenic views of rolling hills and shortgrass prairies. The depot also features a small railroad museum and gift shop – essentially “Austin’s moving museum” on rails. During holidays, special themed rides like the **North Pole Flyer** delight families.
+* **Location:** Cedar Park Depot – 401 E. Whitestone Blvd (US 183), Cedar Park, TX 78613
+* **Contact:** (512) 402-3830; [info@austinsteamtrain.org](mailto:info@austinsteamtrain.org)
+* **Website:** [austinsteamtrain.org](https://www.austinsteamtrain.org)
+* **Excursion Schedule:** Main excursions on Saturdays and Sundays. Typical departure 9:00 AM, returning by 3:30 PM (Hill Country Flyer runs most Saturdays Feb-Dec). North Pole Flyer runs Nov–Dec on select dates.
+* **Tickets:** Required for rides (prices vary by seating class: coach ~$45 adult, discounts for child/senior; first-class or special cars higher). Advance booking recommended (online via official site).
+* **Onboard Amenities:** Restored cars with A/C or heat, restrooms on train, concession car selling snacks.
+* **Museum Hours:** Depot and gift shop generally open Wed–Sun 9:00 AM – 3:00 PM (free admission to see static displays and buy souvenirs).
+* **Accessibility:** The depot is accessible. Some train cars have narrow doors – an accessible coach with a wheelchair lift is available (call ahead to arrange).
+* **Family Friendly:** Yes, popular for kids. Themed rides (e.g. **Princess Flyer**, **Wine Flyer**) cater to different audiences.
+
+### Anderson Mill (Volente)
+
+* **Type/Subcategory:** Historic site & small museum – 19th-century grist mill (replica)
+* **Description:** A historic water-powered grist mill originally built in the 1860s by Thomas Anderson, who produced gunpowder and flour on Cypress Creek. The original mill site is now beneath Lake Travis, but a **full-scale replica waterwheel and millhouse** stand near the shore in Volente. The site includes a small museum that tells the story of the mill’s role during the Civil War and the surrounding community. It is typically open to the public on a limited schedule (such as the 4th Sunday of the month, March–Oct).
+* **Location:** 13974 FM 2769, Volente, TX 78641 (near Volente Beach)
+* **Contact:** (512) 331-6770 (Volente Community Association)
+* **Website:** [andersonsmill.org](http://andersonsmill.org)
+* **Hours:** **Open by appointment or special events**. Public open-house days are usually the fourth Sunday of each month (Mar–Oct) from 2:00–5:00 PM. Otherwise, exterior can be viewed anytime.
+* **Admission:** Free (donations appreciated).
+* **Facilities:** Very limited – small gravel parking area. No restrooms on-site. Informational signage by the mill.
+* **Accessibility:** Uneven ground around the mill; the interior has a few steps – partial accessibility.
+* **Historical Significance:** Listed as a Recorded Texas Historic Landmark. It’s one of the few remaining examples of an early industrial site in the area and provides insight into frontier-era technology.
+
+### Chisholm Trail Crossing Park (Round Rock)
+
+* **Type/Subcategory:** Historic park – Commemorative site of cattle-drive era
+* **Description:** This riverside park in Round Rock marks a famous crossing on the Chisholm Trail, where 19th-century cattle drives forded Brushy Creek. It features **life-size bronze sculptures** of longhorn cattle being driven by mounted cowboys across the creek, dramatically bringing history to life. The actual “round rock” – the large limestone rock in the creek that gave the city its name – is visible here when water is low. Interpretive plaques explain the significance of the route.
+* **Location:** 500 Chisholm Trail Rd, Round Rock, TX 78681
+* **Hours:** 6:00 AM – 11:00 PM daily
+* **Admission:** Free
+* **Facilities:** Adjacent parking lot (at 411 Chisholm Trail), walking paths to sculptures, benches. The park connects with the Brushy Creek Regional Trail. Nearest restrooms at Memorial Park (a short walk).
+* **Family Appeal:** Kids often enjoy climbing on the *round rock* itself and viewing the impressive cattle sculptures up close.
+* **Historical Note:** The famous **“Round Rock”** in Brushy Creek was a landmark for wagon trains and cattle drives, indicating a safe low-water crossing point. The sculptures by artist Jim Thomas honor Round Rock’s frontier heritage.
+
+### Bagdad Cemetery (Leander)
+
+* **Type/Subcategory:** Historic cemetery – Film and local history site
+* **Description:** A small pioneer cemetery dating back to the 1850s, notable in pop culture as a filming location for the original *Texas Chainsaw Massacre* (1974). Several scenes were shot here, giving the cemetery a bit of lore among horror movie fans. It is also the resting place of many early Leander area settlers (the surrounding community was once called “Bagdad”). Visitors come both for genealogy/history and to see the spot featured in the cult classic film.
+* **Location:** 400-458 Bagdad Cemetery Rd, Leander, TX 78641
+* **Hours:** Open during daylight hours (respectful visitation only)
+* **Admission:** Free
+* **Facilities:** None – just open grounds with graves and a gravel path. Parking along the roadside.
+* **Etiquette:** As an active historic cemetery, visitors should be respectful: no loud noise, do not disturb graves or leave litter. Photography is allowed, but be mindful if funerals or mourners are present.
+
+## Family & Adventure Attractions
+
+### Lake Travis Zipline Adventures
+
+* **Type/Subcategory:** Outdoor adventure park – Zipline course and private beach
+* **Description:** The longest and fastest zipline experience in Texas, featuring a **3-hour guided tour** with five ziplines that soar over Lake Travis and its canyons. The final zipline is an adrenaline-pumping 2,800-foot long ride – the ultimate thrill for adventure-seekers. Between zips, guides lead participants on short hikes through scenic Hill Country terrain. After the tour, guests get all-day access to a private lakefront beach to picnic, play games, or relax in hammocks. They even offer moonlight zip tours on select nights for an extra thrill.
+* **Location:** 14529 Pocohontas Trail, Volente, TX 78641 (north shore of Lake Travis, near Volente Beach)
+* **Contact:** (512) 614-1996; [info@ziplaketravis.com](mailto:info@ziplaketravis.com)
+* **Website:** [ziplaketravis.com](https://www.ziplaketravis.com)
+* **Hours:** Tours by reservation only. Operates March–November (closed in winter). Tours depart multiple times daily in summer; reduced schedule spring/fall. **Advance booking required** (online or by phone).
+* **Admission:** Tour price ~$130 per person (ages 10+ only; weight 70–250 lbs required). Price includes all equipment, guides, boat ride, and beach access. Group and weekday discounts sometimes offered.
+* **Facilities:** Check-in office with parking, restrooms, and lockers. Complimentary bottled water provided during tour. The private beach has picnic tables, hammocks, and games (volleyball, horseshoes). No food service on-site – guests can bring coolers/picnic or buy snacks from nearby Volente Beach restaurant.
+* **Safety:** Professionally guided; all gear (helmet, harness) provided. Guides give safety briefing and training on a practice “bunny slope” zip. **Closed-toe shoes** required (hiking up to 1 mile is part of tour). Participants must sign a waiver.
+* **Reviews & Ratings:** Outstanding reputation – **4.9/5** on Google (over 5,100 reviews) – praised for spectacular views and fun, knowledgeable guides.
+
+### Waterloo Adventures
+
+* **Type/Subcategory:** Water park (open-water) – Floating obstacle course & beach
+* **Description:** A one-of-a-kind *floating water park* and challenge course on Lake Travis. Waterloo Adventures combines a **600-foot-long inflatable obstacle course** on the water – complete with climbing walls, slides, bridges, and trampolines – with a private island-style beach experience. Sessions include a timed adventure on the giant floating “aquapark” followed by unlimited playtime on additional standalone inflatables (like floating picnic tables and lily pads) and access to a lakefront chill-out area. It’s an all-in-one lake day adventure offering both high-energy fun and relaxation.
+* **Location:** 13987 FM 2769, Leander, TX 78641 (at Adventure Island on Lake Travis, near Volente)
+* **Contact:** (512) 614-1979; [info@waterlooadventures.com](mailto:info@waterlooadventures.com)
+* **Website:** [waterlooadventures.com](https://waterlooadventures.com)
+* **Operating Season:** Summer only (typically May through Labor Day). Sessions available by reservation, usually Wed–Sun.
+* **Hours:** Multiple start times per day (e.g., 10AM, 12PM, 2PM) for 2-hour sessions (includes ~45 minutes on obstacle course + unlimited beach play time).
+* **Admission:** ~$59 per person (ages 7+; must be 45” tall and able to swim). Ticket includes boat ferry to the park, life jacket, and access to all activities. **Online booking required**; walk-ups not guaranteed.
+* **Facilities:** On the “island,” there’s a sandy beach area with lounge chairs, shaded picnic tables, restrooms/changing rooms, and outdoor showers. Food truck and bar on-site for snacks, hot dogs, ice cream, and drinks. Free parking at check-in, with a short boat ride to the park (boat ride included).
+* **Accessibility:** Participants must swim and climb – not wheelchair accessible on inflatables. Spectators can stay on shore.
+* **Safety:** Life jackets are **mandatory** (provided). Certified lifeguards and staff oversee the course and enforce rules (rowdy guests will be removed to ensure a safe experience for everyone). All participants sign a waiver.
+* **Reviews & Ratings:** Excellent feedback – **4.7/5** on Google (240+ reviews) – users highlight it as a “super fun day trip” that’s well-organized and safe for all ages.
+
+### Volente Beach Resort & Waterpark
+
+* **Type/Subcategory:** Water park & lakeside resort – Boutique waterpark with beach
+* **Description:** A small, family-friendly waterpark on Lake Travis featuring **four water slides**, a wading pool with a pirate ship for kids, a lazy pool, and a sandy beachfront swim area. Because of its intimate size (about 4 acres), Volente Beach often has shorter lines and a relaxed “hidden gem” vibe. The site also includes **Beachside Billy’s**, a restaurant/bar, and bungalow rentals across the street. It’s a perfect summer spot for those looking to beat the heat without the huge crowds of bigger parks.
+* **Location:** 16107 FM 2769, Leander, TX 78641 (Volente, on Lake Travis shore)
+* **Contact:** (512) 258-5110
+* **Website:** [volentebeach.com](https://www.volentebeach.com)
+* **Operating Season:** Memorial Day through Labor Day (summer). Open weekends in May, daily in summer, then weekends in late August.
+* **Hours:** Generally 11:00 AM – 7:00 PM (check website for specific days). Closed in off-season.
+* **Admission:** ~$25.99 for adults, $20.99 for kids under 42″ tall (2025 season rates). Cheaper Twilight tickets available late day. **Free** for resort guests. Tickets sold on-site (no reservation needed for day passes).
+* **Facilities:** Parking lot across street, locker rentals, changing rooms, **Volleyball court**, **bar & grill** (Beachside Billy’s offers casual food and lakeside drinks). Small gift shop for swim gear. Private beach and dock for lake swimming.
+* **Accessibility:** The park terrain is mostly flat. Pools have ladder entry. Not all areas may be wheelchair accessible (sand beach).
+* **Safety:** Lifeguards on duty at slides and pools. The lake swim area is roped off; life vests recommended for kids (available free). Outside food/drinks not allowed (except water).
+* **Reviews & Ratings:** Good ratings – about **4.2/5** average (Google, ~920 reviews) – appreciated for being family-oriented and less crowded, though facilities are smaller than major parks.
+
+### Rock’n River Water Park
+
+* **Type/Subcategory:** Outdoor water park – Community aquatic park
+* **Description:** A large city-operated waterpark in Round Rock’s Old Settlers Park, offering a fun mix of slides and splash areas at affordable prices. Attractions include a **lazy river**, crazy slides like the *Texas Twister* tube slide and *The Perilous Plunge* drop slide, a **sprayground** for younger kids, water basketball, and a **zero-depth entry beach pool**. There are shaded cabanas and pavilions for rent, making it popular for family outings and birthday parties in summertime.
+* **Location:** 3300 E Palm Valley Blvd, Round Rock, TX 78665
+* **Contact:** (512) 671-2737
+* **Website:** [roundrocktexas.gov/rocknriver](https://www.roundrocktexas.gov/rocknriver)
+* **Operating Season:** Summer (June–August) daily; weekends only late May and early September.
+* **Hours:** 12:00 PM – 6:00 PM (typical hours, varies by day; closed Mondays for maintenance).
+* **Admission:** Very budget-friendly – approx $10 adult, $5 child/senior (Round Rock residents get a small discount). Tickets at gate only. Capacity limited; on very busy days gate may close if full.
+* **Facilities:** Free parking, locker rentals, changing rooms, showers, **concession stand** (affordable snacks), ample picnic and seating areas, **tube rentals** (for lazy river, included with entry). Lifeguards throughout park.
+* **Accessibility:** Zero-depth entry pool and lazy river accommodate wheelchairs; water wheelchairs available on request.
+* **Estimated Visit Duration:** 3–4 hours can easily be spent enjoying the variety of water features.
+* **Note:** As a municipal water park, it’s focused on fun and value – expect lots of local families and a casual atmosphere.
+
+### Kalahari Resorts & Conventions (Round Rock)
+
+* **Type/Subcategory:** Theme resort – **Indoor water park** & entertainment complex
+* **Description:** A massive African safari-themed resort boasting America’s **largest indoor water park** (223,000 sq ft) alongside a hotel, conference center, and endless entertainment. The indoor waterpark features high-thrill slides, a wave pool, surf simulator, kids’ play areas, and a sizable outdoor pool as well. Beyond the water attractions, Kalahari offers a huge **Family Entertainment Center** with arcade games, mini-golf, bowling, escape rooms, laser tag, and even indoor thrill rides. It’s essentially a self-contained vacation destination.
+* **Location:** 3001 Kalahari Blvd, Round Rock, TX 78665 (off US 79, next to Dell Diamond)
+* **Contact:** (512) 651-1000
+* **Website:** [kalahariresorts.com/texas](https://www.kalahariresorts.com/texas)
+* **Hours:** **Water Park:** Typically 10:00 AM – 8:00 PM (longer on peak weekends). Indoor theme park and other amenities have extended hours (some open till 11 PM). Open year-round (indoor facilities are climate-controlled).
+* **Admission:** Waterpark access is included for resort guests (up to 4 passes per room). **Day passes** for non-guests are sold in limited quantities (prices ~$90/person peak, $60 off-peak) – purchase online in advance recommended. Each attraction inside the Adventure Park is pay-as-you-go or via combo passes.
+* **Facilities:** 975 hotel rooms, multiple restaurants (casual to upscale dining), spa, shopping, and huge convention/event spaces. Free parking lots and valet service. The **Adventure Park** (Tom Foolery’s) covers 80,000 sq ft with rides (a roller coaster, drop tower), VR experiences, and more. **Cabanas** available for rent in the waterpark. Everything is indoors, making it a weather-proof destination.
+* **Accessibility:** Fully accessible property; the water park provides complimentary life vests and has pool lifts. Staff can assist guests with disabilities on certain slides/rides as needed.
+* **Capacity & Popularity:** The resort can accommodate thousands of visitors; with 11,000+ person capacity for events and waterpark capacity in the high hundreds. Peak times are summer weekends – expect crowds. Visiting on weekdays or offseason can be quieter.
+* **Reviews:** Generally very positive for the waterpark and amenities, though high cost is noted. (Facebook recommendation rate ~92% from 1,800+ reviews).
+
+### Austin Aquarium (Cedar Park)
+
+* **Type/Subcategory:** Interactive aquarium – Small private aquarium with petting exhibits
+* **Description:** A for-profit aquarium located in a strip mall, known for its interactive exhibits where kids can touch and feed animals. Despite its name, it’s a modest facility featuring tanks of fish, rays, sharks, and reptiles, plus encounters with birds and lemurs. Popular activities include hand-feeding stingrays and lorikeets, and a play area with a slide. The Austin Aquarium often appeals to families with young children looking for a hands-on experience, though it has drawn mixed reviews regarding animal care and value.
+* **Location:** 13530 N US-183 #101, Austin, TX 78750 (in the Lakeline Plaza center)
+* **Contact:** (512) 222-5586; [info@austinaquarium.com](mailto:info@austinaquarium.com)
+* **Website:** [austinaquarium.com](https://austinaquarium.com)
+* **Hours:** Open daily, 10:00 AM – 7:00 PM (8:00 PM on Sat). Open 365 days/year.
+* **Admission:** $24.95 Adults, $19.95 Children (age 3–11). Additional animal encounters or food cups are extra. Annual passes available. Tickets available at door or online.
+* **Facilities:** Free parking lot. Indoor facility (~22,000 sq ft). Gift shop, snacks for purchase. Strollers allowed.
+* **Accessibility:** All exhibits on one floor; aisles can accommodate wheelchairs (may be tight in spots if crowded).
+* **Notes:** Expect a smaller-scale experience – the aquarium is in a converted retail space. Hands must be washed after touching animals. Some exhibits allow touching under staff supervision (e.g., starfish, rays).
+* **Reviews:** **Mixed** – Yelp ~3.2/5 from 1,100+ reviews. Many enjoy the interactivity for kids, while others express concern over exhibit quality. If you manage expectations, it can be a fun short outing especially with children.
+
+### The Crossover (Cedar Park)
+
+* **Type/Subcategory:** Sports & entertainment complex – Ice rinks, sports courts, music and more
+* **Description:** A 200,000 sq ft multi-use sports complex and entertainment hub. The Crossover houses two NHL-size **ice rinks** (home to local hockey and skating programs), dual turf fields for soccer/football, sand volleyball courts, esports gaming center, and more. It’s also a social destination with a **fieldhouse-style restaurant/bar**, live music stage, kids’ play area, and retail shops catering to sports enthusiasts. Whether you want to catch a youth hockey game, take skating lessons, play pickleball, or enjoy a craft beer while listening to a band, the Crossover has something for everyone.
+* **Location:** 1717 Scottsdale Dr, Cedar Park, TX 78641
+* **Contact:** (512) 957-7902; [info@crossovertx.com](mailto:info@crossovertx.com)
+* **Website:** [crossovertx.com](https://crossovertx.com)
+* **Hours:** Varies by activity and tenant. Generally 7:00 AM – 11:00 PM for the facility. The on-site restaurant (Fieldhouse) open lunch through late evening. Public skate sessions typically afternoons/evenings on select days.
+* **Admission:** Entry to complex is free. Fees apply for specific activities (public ice skating ~$10 + $5 rental, sports court rentals, etc.). Some events like youth hockey games are free to watch; special events might have tickets.
+* **Facilities:** Ample parking. Locker rooms for athletes. **Fieldhouse Bar & Grill** with indoor and patio seating overlooking courts. The **Hill Country Indoor Shooting** and **Austin Pickle Ranch** are planned additions. Currently also contains **CrossFit gym**, **dance studio**, and **esports arcade** (“Esports Cave”).
+* **Family-Friendly:** Yes – open spaces and a playground make it easy for kids. Often hosts family events, sports camps, and birthday parties.
+* **Notable:** The Crossover has become a community gathering spot since opening in 2021, combining athletics with entertainment in one venue.
+
+### Main Event Entertainment (Austin)
+
+* **Type/Subcategory:** Indoor entertainment center – Bowling, arcade, and more
+* **Description:** A large family fun center offering **bowling lanes**, laser tag, a multi-level arcade, billiards, mini golf, and virtual reality games. There’s also a full bar and café serving food and drinks, making it a popular spot for both kid’s birthday parties and adult outings. Main Event provides a one-stop venue for indoor fun, especially on hot or rainy days.
+* **Location:** 13301 N US Hwy 183, Austin, TX 78750 (at the intersection of Hwy 183 & Anderson Mill Rd)
+* **Contact:** (512) 401-0000
+* **Website:** [mainevent.com](https://www.mainevent.com)
+* **Hours:** Mon–Thu 11 AM – 12 AM; Fri 11 AM – 1 AM; Sat 9 AM – 1 AM; Sun 11 AM – 12 AM. (Opens earlier on Sat for morning bowling.)
+* **Pricing:** Activities are pay-per-play (e.g., bowling ~$25/lane per hour; laser tag ~~$8 per game; arcade games on card system). All-you-can-play packages available (~~$25 for unlimited activities).
+* **Facilities:** Free parking. 28 bowling lanes with big screens, private room for events, over 100 arcade games, rock climbing wall and gravity ropes course at some locations (check if this location has ropes). Full-service bar & kitchen (serves pizza, burgers, etc.).
+* **Accessibility:** Wheelchair access throughout; bowling lanes have ramp assist if needed. Loud environment due to arcade.
+* **Popular For:** Birthday parties, group events, and “Monday Night Madness” deals. Reserve lanes in advance on busy nights.
+
+### Urban Air Adventure Park (Cedar Park)
+
+* **Type/Subcategory:** Indoor amusement park – Trampoline & adventure park
+* **Description:** A large indoor active-play center featuring wall-to-wall trampolines, foam pit, **warrior obstacle course**, climbing walls, basketball dunk trampolines, and a multi-level **sky rider coaster** that zips across the facility. There’s also an indoor playground and ball pit for smaller kids. Urban Air provides energetic fun for kids and teens, combining the thrill of a trampoline park with ninja-style challenges and even virtual reality games.
+* **Location:** 13201 N Hwy 183, Suite A, Austin, TX 78750 (in the same shopping area as Main Event, near Lakeline Mall)
+* **Contact:** (512) 892-8022
+* **Website:** [urbanair.com/texas-cedar-park](https://www.urbanair.com/texas-cedar-park)
+* **Hours:** Mon–Thu 4 PM – 8 PM; Fri 4 PM – 10 PM; Sat 10 PM – 10 PM; Sun 12 PM – 8 PM (extended hours on school holidays).
+* **Admission:** Tiered passes ranging ~$20–$35 per person for unlimited play, depending on attractions access (basic trampoline only vs. deluxe with zip coaster, etc.). Grip socks required ($3) if you don’t bring your own. Spectators (non-participating adults) typically free.
+* **Facilities:** Plenty of seating for parents, snack bar with food/drinks, party rooms for birthdays.
+* **Safety:** All participants must sign a waiver. Staff monitors each area. Attractions have height requirements (e.g., warrior course and coaster have minimum height ~48″).
+* **Pro Tip:** Go early or weekdays to avoid lines for popular attractions like the Sky Rider coaster.
+
+### Austin’s (Austin’s Park & Pizza) – Fun center
+
+* **Type/Subcategory:** Indoor/outdoor amusement park – Go-karts, mini-golf, arcade, rides
+* **Description:** A classic family fun park offering a bit of everything: **go-kart tracks**, two 18-hole mini-golf courses, carnival-style rides, batting cages, bumper boats, and a large indoor arcade with laser tag and bowling. Formerly known as Austin’s Park & Pizza, it has an all-you-can-eat buffet option that includes pizza and salad for fueling up between activities. It’s a go-to spot for a full day of family entertainment. *(Note: As of 2024 it rebranded some operations as “Epic Fun” — features remain similar.)*
+* **Location:** 16231 N IH-35, Pflugerville, TX 78660 (just southeast of Round Rock, ~20 miles east of Leander)
+* **Contact:** (512) 670-9600
+* **Website:** [austinspark.com](https://austinspark.com)
+* **Hours:** Wed & Thu 3 PM – 9 PM; Fri 3 PM – 11 PM; Sat 10 AM – 11 PM; Sun 10 AM – 9 PM; (Closed Mon–Tue). Hours may extend in summer.
+* **Pricing:** Day pass ~$40–$50 for unlimited attractions + buffet; or pay per activity ($8-$10 each). Arcade games use reloadable cards. Spectator admission free for non-riders.
+* **Facilities:** Large parking lot. Buffet restaurant and bar inside. Private party rooms. Outdoor seating near rides.
+* **Note:** Rides and outdoor attractions have height requirements. During Texas summers, plan outdoor activities for evening or use sunscreen/hydration.
+
+### iFLY Indoor Skydiving (Austin)
+
+* **Type/Subcategory:** Adventure sports center – Indoor skydiving wind tunnel
+* **Description:** An indoor vertical wind tunnel that simulates the free-fall experience of skydiving, without a plane or parachute. Visitors as young as 3 can “fly” on a cushion of air inside the tall glass tunnel, guided by professional instructors. It’s a unique adrenaline rush and a way to learn skydiving body control in a safe environment. First-timers get a brief training, then suit up with helmet and goggles for their flight(s) in the wind tunnel.
+* **Location:** 13265 N US-183 Hwy, Austin, TX 78750 (next door to Main Event & Austin Aquarium in NW Austin)
+* **Contact:** (512) 774-4359
+* **Website:** [iflyworld.com/austin](https://www.iflyworld.com/austin/)
+* **Hours:** Mon-Thurs 12 PM – 7 PM; Fri 12 PM – 9 PM; Sat 9 AM – 10 PM; Sun 10 AM – 7 PM. Reservations recommended.
+* **Admission:** First-time flyer packages start ~$85/person for 2 flights (about 1 minute each in air) including training and gear. Return flyers and group packages available. Book online or by phone.
+* **Experience Details:** Plan for ~1.5 hours total (check-in, training, then flights). Flight suit, earplugs, helmet provided. Participants must weigh under 300 lbs and be in relatively good health (no prior shoulder dislocations).
+* **Spectators:** Welcome to watch from the viewing area at no charge (fun to see others flying).
+* **Accessibility:** They can accommodate many disabilities; paraplegic and quadriplegic individuals have flown with instructor assistance. Call ahead for special accommodations.
+
+### Other Notable Family Attractions
+
+* **Cedar Park Sculpture Garden:** An outdoor exhibit next to Cedar Park City Hall (450 Cypress Creek Rd) displaying rotating sculptures by Texas artists. Free, dawn-to-dusk; a short walk with art pieces and a tranquil pond.
+* **Play for All Abilities Park (Round Rock):** An award-winning 51,000 sq ft inclusive playground designed for children of all abilities (2400 Avery-Nelson Blvd, Round Rock). Features sensory play areas, a kid-size village, and shaded picnic spots. Open daily until 10 PM, free entry.
+* **Epic Fun (South Cedar Park)** – A newer indoor play center (in Oak Hill area) with ropes course, bumper cars, arcade – mention if within radius.
+* **Moviehouse & Eatery by Cinépolis (Cedar Park):** Dine-in cinema at 1335 E Whitestone Blvd – not a “tourist” attraction per se, but a popular local entertainment option (recliner seats and full kitchen/bar service).
+
+## Sports & Entertainment Venues
+
+### H-E-B Center at Cedar Park
+
+* **Type/Subcategory:** Arena – Multi-purpose sports and concert arena
+* **Description:** A modern, **city-owned 8,000-seat venue** that hosts a wide variety of events year-round. Home ice to the Texas Stars (AHL hockey) and home court to the Austin Spurs (NBA G League basketball), the H-E-B Center also features big-name concerts, family shows (Disney on Ice, Cirque du Soleil), rodeos, and more. Its mid-size capacity and quality acoustics make it a premier North Austin area arena for entertainment, drawing about 150 events annually.
+* **Location:** 2100 Avenue of the Stars, Cedar Park, TX 78613
+* **Contact:** (512) 600-5000
+* **Website:** [hebcenter.com](https://www.hebcenter.com)
+* **Events & Tickets:** Varies – box office open Mon-Fri 10 AM – 6 PM. Tickets sold via Ticketmaster or at venue. Texas Stars hockey season runs Oct–Apr (approx. 36 home games); Austin Spurs basketball runs Nov–Mar. Concerts and special events scheduled year-round.
+* **Facilities:** **Parking:** 2,800 paved spots ($5–$15 event parking fee). **Seating:** Bowl and luxury suites (capacity ~6,800 for hockey, up to 8,000 for concerts). Multiple concession stands with diverse food/beer, a pub on the concourse, merchandise kiosks. **Time zone:** Central Time (for event scheduling).
+* **Accessibility:** Fully ADA-compliant – reserved accessible seating areas, elevators, assistive listening devices, and sensory-inclusive program (sensory bags and quiet room available).
+* **Estimated Visit Duration:** 2–3 hours (typical for games and shows). Arrive ~1 hour early for big events to park and get seated.
+* **Security:** Walk-through metal detectors and bag checks at entry. Clear bag policy in effect (small clutches or transparent bags only). No outside food/drink or professional cameras unless authorized.
+
+### Dell Diamond
+
+* **Type/Subcategory:** Stadium – Minor league baseball park & event venue
+* **Description:** A beautiful **11,000-capacity** ballpark that is home to the Round Rock Express, the Triple-A affiliate of the Texas Rangers. Dell Diamond offers an affordable, family-friendly baseball experience with modern amenities and hill-country charm. It features a 360° concourse, grassy berm seating, luxury suites, a pool & spa deck, and even a kids’ play area and playground in the outfield. In addition to baseball (April–Sept home games), Dell Diamond hosts concerts, festivals, and community events year-round (from car shows to holiday light displays).
+* **Location:** 3400 E Palm Valley Blvd (US 79), Round Rock, TX 78665
+* **Contact:** (512) 255-2255 (Round Rock Express ticket office)
+* **Website:** [milb.com/round-rock](https://www.milb.com/round-rock) (team site) / [roundrockexpress.com](https://www.roundrockexpress.com)
+* **Game Day Info:** Express games: gates open 1 hour before first pitch. Tickets range ~$10 lawn to $25 box seats (with various specials like $2 Tuesdays). Parking $15 cash. Frequent promotions (fireworks on Fridays, giveaways, kids run the bases Sundays).
+* **Facilities:** Plentiful concessions highlighting local food (Texas BBQ, Nolan Ryan beef hot dogs), air-conditioned **sports bar** overlooking field, **Home Run Dugout** batting cage experience, and **party areas** for group outings. **Time zone:** Central.
+* **Accessibility:** Fully accessible with elevators, ramps, and shuttle carts from parking for those needing assistance.
+* **Visitor Tip:** The *right-field grassy berm* is great for families (bring a blanket). On hot days, seek seats on third-base side (shaded in evening).
+* **Reviews & Experience:** Rated **4.7/5** on Google (3500+ reviews) as a top-notch minor league venue, often praised for its cleanliness, friendly staff, and fun atmosphere.
+
+### Round Rock Sports Center & Multipurpose Complex
+
+* **Description:** These are two major sports facilities in Round Rock used for tournaments (basketball, volleyball at the indoor Sports Center; soccer, lacrosse, rugby at the outdoor Multipurpose fields). They aren’t tourist attractions per se, but draw many visitors for youth sports competitions. Both have modern amenities and are known in Round Rock’s “Sports Capital of Texas” offerings.
+
+### Local Collegiate & High School Stadiums
+
+* **Description:** Dragon Stadium in Round Rock and Gupton Stadium in Cedar Park host Friday night high school football – a Texan cultural experience. While not typical tourist spots, catching a local football game under the lights can be a fun community event in the fall.
+
+### Haute Spot Event Venue (Cedar Park)
+
+* **Type:** Outdoor live music venue – mid-sized concert venue with open-air lawn and stage, hosting touring bands, local music, and special events. Offers an intimate concert experience with food trucks and bars on-site. Located at 1501 E New Hope Dr, Cedar Park.
+
+## Wineries, Breweries & Distilleries
+
+*(The Hill Country around Leander is emerging as a craft beverage destination, with several wineries, breweries, and even distilleries offering tours and tastings. Below are some notable ones within ~20 miles.)*
+
+### Thirsty Mule Winery & Vineyard (and Schitz Creek Distillery)
+
+* **Type:** Winery & distillery – Casual vineyard tasting room with on-site spirits
+* **Description:** A quirky, family-run winery located on a ranch property, famous for being “the only winery in Texas where you can **drink in a cave**” – their tasting room is partially underground in a man-made cave-like cellar. Thirsty Mule offers a range of Texas and West Coast wines produced on-site, from dry reds to sweet fruit wines. Wine tastings are $10 for 4 samples, and you can also try spirits from the attached **Schitz Creek Distillery**, which distills vodka and whiskey on-site. The atmosphere is laid-back and dog-friendly.
+* **Location:** 101 CR 257, Liberty Hill, TX 78642 (NW of Leander ~12 miles)
+* **Contact:** (512) 778-5990
+* **Website:** [thirstymule.com](https://thirstymule.com)
+* **Hours:** Wed–Thu 12 PM – 5 PM; Fri–Sat 12 PM – 6 PM; Sun 12 PM – 5 PM; (Closed Mon–Tue)
+* **Tastings & Tours:** Walk-in tastings available; groups of 8+ require reservation. Distillery tours informal (ask staff). Bottles and merchandise for sale.
+* **Facilities:** Tasting bar in the “wine cave”, outdoor patio seating, occasional live music on weekends. Parking on gravel lot.
+* **Accessibility:** The main tasting room is one level down via ramp. The cave atmosphere is dim but navigable.
+* **Notable Wine/Spirit:** Their popular “Corky Mule” wine and a Maple Whiskey are customer favorites.
+
+### Bent Oak Winery
+
+* **Type:** Winery – Tasting room and micro-winery
+* **Description:** A boutique winery tucked in an industrial area of Cedar Park, where they handcraft small-batch wines using both Texas High Plains grapes and California varietals. Bent Oak’s intimate tasting room offers guided tastings in a friendly, unpretentious setting. They often have live music or food trucks on weekends. Known for award-winning Tempranillo and their Cabernet Sauvignon from the Texas High Plains.
+* **Location:** 2000 Windy Terrace, Suite 2-B, Cedar Park, TX 78613
+* **Contact:** (512) 953-8094; [info@bentoakwinery.com](mailto:info@bentoakwinery.com)
+* **Website:** [bentoakwinery.com](https://bentoakwinery.com)
+* **Hours:** Thu 2–7 PM; Fri 2–9 PM; Sat 11 AM–7 PM; Sun 12–5 PM (closed Mon–Wed).
+* **Tastings:** $15 for a flight of 5 wines (waived with bottle purchase). Reservations recommended for groups.
+* **Facilities:** Indoor tasting bar and tables, small outdoor area. Light snacks available. Limited parking shared with neighboring businesses.
+* **Accessibility:** Fully accessible (ground floor, no steps).
+* **Fun Fact:** They have an adopt-a-vine program where locals can “sponsor” vines at partner vineyards.
+
+### Georgetown Winery
+
+* **Type:** Winery – Urban winery & tasting room
+* **Description:** The first winery in Williamson County (opened 2007), Georgetown Winery is located in a historic building on the Georgetown Square. They produce a variety of wines (many from Texas grapes) at their Liberty Hill production site (Thirsty Mule is their sister winery), but this cozy storefront offers daily wine tastings and a gift shop. It’s known for sweet fruit wines as well as dry reds. A popular pick is their smooth Merlot.
+* **Location:** 715 S Main St, Georgetown, TX 78626
+* **Contact:** (512) 869-8600
+* **Website:** [georgetownwinery.com](https://www.georgetownwinery.com)
+* **Hours:** Mon–Thu 12–6 PM; Fri–Sat 12–8 PM; Sun 12–6 PM.
+* **Tastings:** $10 for 5 tastings. No reservation needed for small groups. Wines by the glass and frozen wine slushies also available.
+* **Atmosphere:** Charming and rustic – the interior retains original tin ceilings and wood floors. There’s a small seating area and bar.
+
+### Barons Creek Vineyards (Georgetown Tasting Room)
+
+* **Type:** Winery – Upscale tasting lounge
+* **Description:** A satellite tasting room of the Fredericksburg-based Barons Creek Winery. This stylish lounge offers tastings of their portfolio in a comfortable setting with indoor and patio seating. They often pair wines with cheese or chocolate. Barons Creek focuses on Mediterranean and Spanish varietals and offers some food pairings. **Live music** on weekends adds to the ambiance.
+* **Location:** 706 S Austin Ave, Georgetown, TX 78626 (on the Square)
+* **Contact:** (512) 688-5755
+* **Website:** [bcvwines.com](https://www.bcvwines.com)
+* **Hours:** Wed–Thu 2–7 PM; Fri 2–9 PM; Sat 12–9 PM; Sun 12–5 PM; (Mon–Tue closed).
+* **Tastings:** About $25 for a tasting flight. Glass and bottle sales available.
+* **Facilities:** Street parking. Indoor lounge and small outdoor sidewalk seating.
+* **Group Info:** For groups larger than 6, call ahead. They can host private events.
+
+### Flat Creek Estate Winery & Vineyard
+
+* **Type:** Winery & resort – Vineyard estate with full winery, bistro, and disc golf
+* **Description:** A 80-acre estate in the rolling hills near Lake Travis, featuring 20 acres of vineyards, a Tuscan-inspired tasting room, an on-site restaurant (The Bistro), and even a scenic **18-hole disc golf course winding through the vines**. Flat Creek produces robust reds (like Tempranillo, Sangiovese) and crisp whites, winning many awards. Visitors can enjoy barrel room tours, formal wine tastings, or casual wood-fired pizza on the patio overlooking the vineyard. It’s a bit of a destination, but within reach for a day trip of wine and relaxation.
+* **Location:** 24912 Singleton Bend East Rd, Marble Falls, TX 78654 (technically Marble Falls, but ~18 miles west of Leander, near Lago Vista)
+* **Contact:** (512) 267-6310
+* **Website:** [flatcreekestate.com](https://flatcreekestate.com)
+* **Hours:** Thu–Sun 11 AM – 6 PM (Bistro hours differ slightly; closed Mon–Wed).
+* **Tastings & Tours:** Guided wine tasting flights ~~$25. Estate tours with tram ride and barrel tasting offered Sat–Sun by reservation (~~$45). Disc golf day pass $15 (includes disc rental).
+* **Facilities:** Ample parking. Gorgeous tasting room, event pavilion, B&B accommodations at The Vineyard Villas. Pet-friendly outdoors.
+* **Accessibility:** Grounds are expansive; main buildings accessible, but vineyard terrain is uneven.
+* **Events:** Live music on Saturdays, special wine dinners and an annual grape stomp festival.
+
+### Craft Breweries & Brewpubs:
+
+* **Humble Pint Brewing Co. (Leander):** A local microbrewery with a taproom on Hero Way, Leander. Family-friendly, hosts trivia nights. Try their Hopsdale IPA.
+* **Red Horn Brewery & Roastery (Leander & Cedar Park):** Two locations – original on W. Parmer (Cedar Park) and a newer brewpub on Scottsdale Dr (Leander). They brew coffee and beer; live music and a relaxed vibe. The Trail Runner Golden Ale is a favorite.
+* **Whitestone Brewery (Cedar Park):** A friendly craft brewery with a taproom and beer garden on Whitestone Blvd. They offer core beers (Hefeweizen, IPA) and rotating taps. Kid- and dog-friendly (until 8 PM on weekends). Live music Fridays.
+* **Bull Creek Brewing (Liberty Hill):** A family-run rural brewery with a big patio and occasional tours. Known for their Faded Pale Ale.
+* **San Gabriel River Brewery (Liberty Hill):** Quirky brewery on a ranch, with a taproom and large outdoor area – very laid back. Sometimes has live country music.
+* **Barking Armadillo (Georgetown):** A fun taproom in Georgetown with frequent food trucks and events. Return of the M.A.C. IPA is a hit.
+* **Rentsch Brewery (Georgetown):** German-style brewery with a big beer garden and stage. Also an Outpost taproom on the Georgetown Square.
+* *(Many breweries don’t serve food beyond snacks, but allow outside food. Check individual websites for food truck schedules.)*
+
+### Distilleries:
+
+* **Leanderthal Distilling (Leander):** A small-batch distillery named after the local “Leanderthal Lady” archeological find. Produces vodka and agave spirit. Has the **Leanderthal Lounge** tasting room (21+ only) where you can sip cocktails made with their spirits. Location: 11894 Hero Way W, Leander. Open weekends.
+* **Fire Oak Distillery (Liberty Hill):** Craft distillery making bourbon and vodka. Tasting room offers cocktails featuring their spirits. Often highlights a new specialty cocktail each week on social media. Location: 4600 CR 207, Liberty Hill.
+* **Spirit of Texas Distillery (Pflugerville)** – Just outside 20 mi, but known for “Pflugers” Rum and Straight Bourbon.
+
+Many of these establishments have limited hours (often Thu–Sun) and are closed on major holidays, so plan visits accordingly. Most welcome families (except where noted 21+). Always have a designated driver or consider a wine tour service if sampling multiple stops.
+
+## Resorts & Spas
+
+### Miraval Austin Resort & Spa
+
+* **Type/Subcategory:** Luxury wellness resort – All-inclusive spa retreat
+* **Description:** A serene, upscale wellness resort nestled in 220 acres of nature overlooking Lake Travis (just south of Leander). Miraval Austin focuses on mindfulness and personal growth, offering a full spa, yoga and fitness classes, equine therapy, hiking trails, challenge ropes courses, and healthy gourmet cuisine. It’s a digital device-free environment (encouraging guests to unplug). Visitors can come for multi-day stays or buy day passes to enjoy spa services and activities. The atmosphere is tranquil and rejuvenating, catering to adults seeking wellness and relaxation.
+* **Location:** 13500 FM2769, Austin, TX 78726 (near Volente in the Balcones Canyonlands area)
+* **Contact:** (855) 234-1672
+* **Website:** [miravalaustin.com](https://www.miravalaustin.com)
+* **Rates:** Overnight stays are all-inclusive (starting ~$800/night per person, including meals and resort credit for spa/activities). Day packages ~$300 for access + one treatment.
+* **Facilities:** 117 guest rooms and villas, **Life in Balance Spa** (with sauna, steam, infinity pool), yoga barn, meditation areas, two infinity pools, Cypress Creek organic farm on-site, Hilltop Crossings kitchen (main restaurant) and a smoothie bar.
+* **Activities:** Daily schedule includes yoga, meditation, fitness, nutrition lectures, hatchet throwing, **Challenge Course** (zipline & tightrope adventure to build resilience), horseback therapies, cooking classes, and more – most included in stay.
+* **Time Zone:** Central (all activities scheduled accordingly).
+* **Note:** 18+ resort (no children). Alcohol is available but the emphasis is on balanced living. It’s a **gratuity-free** resort – staff tipping is built into the price.
+
+### River Ranch Inn (Liberty Hill)
+
+* **Type/Subcategory:** Themed boutique inn – Art-themed bed & breakfast and outdoor retreat
+* **Description:** A hidden gem bed-and-breakfast that doubles as an immersive art experience. Each room at River Ranch Inn is elaborately themed (from bohemian “Allegra” to dreamy “Calista”), designed to spark imagination. The inn sits on land by the South San Gabriel River, where guests can kayak, paddleboard, fish, or wander an art sculpture garden. It’s pet-friendly and geared towards couples or small groups looking for a creative, nature-filled getaway. While primarily lodging, day visitors sometimes come for special art events or river access (inquire ahead).
+* **Location:** 1750 CR 256, Liberty Hill, TX 78642 (between Leander and Liberty Hill)
+* **Contact:** (512) 548-4252
+* **Website:** [riverranchinn.com](https://riverranchinn.com)
+* **Amenities:** Guests get complimentary use of kayaks and river gear. There’s a communal kitchen and picnic area. Art installations throughout property.
+* **Pet Policy:** Pets welcome for $25/night fee.
+* **Note:** Opened in late 2021 by local artists (one formerly behind Austin’s famous Lucy in Disguise costume shop), so creativity runs deep here.
+
+### The Vineyard at Florence
+
+* **Type/Subcategory:** Winery resort – Vineyard community with boutique hotel and spa
+* **Description:** A destination estate north of Leander that combines a working vineyard and winery with a **luxury resort**. Guests can stay in upscale villas, enjoy wine tastings, dine at the on-site restaurant, indulge in spa treatments, and stroll the Italianate grounds. Live music on weekends and events like grape stomps add to its charm. **Note:** This is in Florence, TX (~22 miles north of Leander), slightly beyond 20 miles but noteworthy. The development also includes a residential community (planned 1,000+ homes) making it a unique wine-themed village.
+* **Location:** 111 Via Francesco, Florence, TX 76527
+* **Contact:** (512) 572-7000
+* **Website:** [thevineyardatflorence.com](https://www.thevineyardatflorence.com)
+* **Facilities:** Tasting room, **restaurant**, day spa, pool, event center. Often hosts weddings.
+* **Wines:** Features Texas High Plains grapes; their Merlot is a highlight.
+
+## Seasonal Events & Festivals
+
+*(Though not permanent attractions, several annual events draw visitors to the Leander area each year:)*
+
+* **Leander Old Town Street Festival:** A spring festival (usually May) held in Old Town Leander, featuring live music, art/craft vendors, local food booths, and a carnival. Family-friendly and free entry. Draws thousands for a day of community fun.
+* **Leander Christmas Festival & Parade:** Each December in Old Town Leander – includes a holiday marketplace, entertainment, and the Lighting of the Old Town Christmas tree. Kid favorites like snow play areas and Santa visits. Free admission.
+* **Texas Pumpkin Fest:** A fall festival every October, hosted at 8760 FM 2243 in Leander (VFW grounds). Boasts a huge pumpkin patch, themed pumpkin houses, corn maze, games, and attractions for kids. Open daily through October with an admission fee (~$10). Very popular for family fall photos and Halloween fun.
+* **Liberty Hill Independence Day Spectacular:** Early July event with fireworks, live music, and family activities (15 min from Leander).
+* **Georgetown Red Poppy Festival:** Late April in Georgetown’s Square – though ~20 miles, notable regional festival with concerts (free), car show, and loads of red poppy-themed fun (Georgetown is known for its spring poppy blooms). Attendance ~30–50k over a weekend. *(Named one of the “Top 10 Best” by a Yelp snippet)*.
+
+Each event has specific dates and times that change yearly – check city or event websites for the latest. These festivals offer a glimpse of local culture and are worth timing a visit to Leander if possible.
+
+## Visitor Tips and Conclusion
+
+Leander’s 20-mile radius encompasses a rich mix of attractions – from natural wonders and historic marvels to adrenaline-filled adventures and leisurely sips at wineries. Most of the area lies in the **Central Time Zone (CT)** and experiences hot summers and mild winters, so plan outdoor activities accordingly (mornings and evenings in summer, bring water and sunscreen). Many attractions are **family-friendly** and **pet-friendly**, reflecting the community-oriented vibe of the region.
+
+Whether you’re tracing dinosaur footprints by a creek, ziplining over Lake Travis, cheering at a hockey game, or tasting wine in the hills, the Leander area offers something for every interest. The information above was compiled from a variety of sources (official sites, local guides, and recent visitor reviews) and is up-to-date as of mid-2025. Enjoy your exploration of Leander and its surroundings – a place where hill country charm meets exciting opportunities for adventure and discovery!
+
+    </script>
+
+    <script>
+      // Render markdown to an offscreen container to parse structure
+      const md = document.getElementById('leander-md').textContent;
+      const temp = document.createElement('div');
+      temp.innerHTML = marked.parse(md, { mangle: false, headerIds: true });
+
+      // Categories are h2 headers; attractions are h3 with following lists/paragraphs
+      const guideCardsEl = document.getElementById('guide-cards');
+      const tocEl = document.getElementById('toc');
+
+      function createChevron() {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('class', 'chevron');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('d', 'M6 9l6 6 6-6');
+        svg.appendChild(path);
+        return svg;
+      }
+
+      function summarize(text) {
+        if (!text) return '';
+        const t = text.replace(/\s+/g, ' ').trim();
+        return t.length > 140 ? t.slice(0, 137) + '…' : t;
+      }
+
+      // Emoji mapping for attractions
+      const attractionEmojis = {
+        // Nature & Outdoor
+        'Balcones Canyonlands National Wildlife Refuge': '🦅',
+        'Lake Travis North Shore Parks': '🏖️',
+        'Devine Lake Park': '🎣',
+        'Brushy Creek Lake Park': '🚴',
+        'Southwest Williamson County Regional Park': '🚂',
+        'Inner Space Cavern': '🕳️',
+        'Blue Hole Park': '💙',
+        'Leander Dinosaur Tracks': '🦕',
+        
+        // Museums & Historic
+        'Williamson Museum': '🏛️',
+        'Cedar Park Heritage Oak': '🌳',
+        'Austin Steam Train Association': '🚂',
+        'Anderson Mill': '⚙️',
+        'Chisholm Trail Crossing Park': '🐄',
+        'Bagdad Cemetery': '⚰️',
+        
+        // Family & Adventure
+        'Lake Travis Zipline Adventures': '🪂',
+        'Waterloo Adventures': '🏄',
+        'Volente Beach Resort': '🏊',
+        "Rock'n River Water Park": '🌊',
+        'Kalahari Resorts': '🦁',
+        'Austin Aquarium': '🐠',
+        'The Crossover': '🏒',
+        'Main Event Entertainment': '🎳',
+        'Urban Air Adventure Park': '🤸',
+        "Austin's": '🎮',
+        'iFLY Indoor Skydiving': '🪂',
+        
+        // Sports & Entertainment
+        'H-E-B Center': '🏟️',
+        'Dell Diamond': '⚾',
+        'Haute Spot Event Venue': '🎵',
+        
+        // Wineries & Breweries
+        'Thirsty Mule Winery': '🍷',
+        'Bent Oak Winery': '🍇',
+        'Georgetown Winery': '🍾',
+        'Barons Creek Vineyards': '🥂',
+        'Flat Creek Estate': '🍷',
+        'Humble Pint Brewing': '🍺',
+        'Red Horn Brewery': '☕',
+        'Whitestone Brewery': '🍻',
+        'Bull Creek Brewing': '🍺',
+        'San Gabriel River Brewery': '🍺',
+        'Barking Armadillo': '🍺',
+        'Rentsch Brewery': '🍺',
+        'Leanderthal Distilling': '🥃',
+        'Fire Oak Distillery': '🥃',
+        
+        // Resorts & Spas
+        'Miraval Austin Resort': '🧘',
+        'River Ranch Inn': '🎨',
+        'The Vineyard at Florence': '🍷',
+        
+        // Events & Tips
+        'Seasonal Events': '🎪',
+        'Visitor Tips': '🗺️'
+      };
+
+      function getEmojiForAttraction(title) {
+        // Try exact match first
+        for (const key in attractionEmojis) {
+          if (title.includes(key)) {
+            return attractionEmojis[key];
+          }
+        }
+        // Default emoji
+        return '📍';
+      }
+
+      function buildCategoryCard(h2El, contentEls) {
+        const card = document.createElement('section');
+        card.className = 'category-card';
+        const head = document.createElement('div');
+        head.className = 'category-head';
+        const h = document.createElement('h3');
+        h.textContent = h2El.textContent;
+        head.appendChild(h);
+        card.appendChild(head);
+        const body = document.createElement('div');
+        body.className = 'category-body';
+
+        // Within this category, iterate h3 attractions until next h2
+        let i = 0;
+        let hasH3Content = contentEls.some(el => el.tagName === 'H3');
+        
+        if (!hasH3Content) {
+          // For sections without H3 subsections (like Seasonal Events, Visitor Tips)
+          // Show all content directly without collapsible wrapper
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'prose';
+          contentDiv.style.padding = '12px';
+          contentDiv.innerHTML = contentEls.map(d => d.outerHTML).join('');
+          body.appendChild(contentDiv);
+        } else {
+          // Original logic for sections with H3 subsections
+          while (i < contentEls.length) {
+            const el = contentEls[i];
+            if (el.tagName === 'H3') {
+              const title = el.textContent.trim();
+              // Capture subsequent siblings until next H3 or H2
+              const details = [];
+              let j = i + 1;
+              while (j < contentEls.length && !['H3', 'H2'].includes(contentEls[j].tagName)) {
+                details.push(contentEls[j]);
+                j++;
+              }
+              const detailHTML = details.map(d => d.outerHTML).join('');
+              const firstPara = details.find(d => d.tagName === 'P');
+              const bullet = firstPara ? firstPara.textContent : (details[0] ? details[0].textContent : '');
+
+              const item = document.createElement('div');
+              item.className = 'attraction';
+              item.setAttribute('aria-expanded', 'false');
+
+              const summary = document.createElement('div');
+              summary.className = 'attraction-summary';
+              const titleRow = document.createElement('div');
+              titleRow.className = 'attraction-title';
+              const h4 = document.createElement('h4');
+              const emoji = getEmojiForAttraction(title);
+              h4.textContent = `${emoji} ${title}`;
+              const chev = createChevron();
+              titleRow.appendChild(h4);
+              titleRow.appendChild(chev);
+              const sum = document.createElement('div');
+              sum.className = 'summary-text';
+              sum.textContent = summarize(bullet);
+              summary.appendChild(titleRow);
+              summary.appendChild(sum);
+
+              const detailsWrap = document.createElement('div');
+              detailsWrap.className = 'attraction-details';
+              const detailsInner = document.createElement('div');
+              detailsInner.className = 'attraction-details-inner prose';
+              detailsInner.innerHTML = detailHTML;
+              detailsWrap.appendChild(detailsInner);
+
+              summary.addEventListener('click', () => {
+                const expanded = item.getAttribute('aria-expanded') === 'true';
+                item.setAttribute('aria-expanded', String(!expanded));
+                if (!expanded) {
+                  // expand
+                  const h = detailsInner.scrollHeight + 2;
+                  detailsWrap.style.maxHeight = h + 'px';
+                } else {
+                  detailsWrap.style.maxHeight = '0px';
+                }
+              });
+
+              item.appendChild(summary);
+              item.appendChild(detailsWrap);
+              body.appendChild(item);
+
+              i = j; // continue after this block
+              continue;
+            }
+            // Skip non-H3 content at this level
+            i++;
+          }
+        }
+
+        card.appendChild(body);
+        return card;
+      }
+
+      // Walk the parsed nodes to build category cards
+      const children = Array.from(temp.children);
+      const carouselTrack = document.getElementById('carousel-track');
+      const carouselIndicator = document.getElementById('carousel-indicator');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      
+      let currentSlide = 0;
+      const slides = [];
+      
+      let idx = 0;
+      while (idx < children.length) {
+        const node = children[idx];
+        if (node.tagName === 'H2') {
+          const cat = node;
+          const chunk = [];
+          let k = idx + 1;
+          while (k < children.length && children[k].tagName !== 'H2') {
+            chunk.push(children[k]);
+            k++;
+          }
+
+          // Add to TOC
+          const id = cat.id || cat.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          const slideIndex = slides.length; // Current slide index before we add it
+          const a = document.createElement('a');
+          a.href = `#carousel-slide-${slideIndex}`;
+          a.textContent = cat.textContent;
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            goToSlide(slideIndex);
+          });
+          tocEl.appendChild(a);
+
+          // Build card for this category using the chunk
+          const card = buildCategoryCard(cat, chunk);
+          card.id = id;
+          
+          // Wrap in carousel slide
+          const slide = document.createElement('div');
+          slide.className = 'carousel-slide';
+          slide.id = `carousel-slide-${slideIndex}`;
+          slide.appendChild(card);
+          carouselTrack.appendChild(slide);
+          slides.push(slide);
+
+          // Add indicator dot
+          const dot = document.createElement('div');
+          dot.className = 'indicator-dot';
+          if (slideIndex === 0) dot.classList.add('active');
+          dot.addEventListener('click', () => goToSlide(slideIndex));
+          carouselIndicator.appendChild(dot);
+
+          idx = k;
+          continue;
+        }
+        idx++;
+      }
+      
+      function updateCarousel() {
+        carouselTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+        
+        // Update indicators
+        carouselIndicator.querySelectorAll('.indicator-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === currentSlide);
+        });
+        
+        // Update button states
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === slides.length - 1;
+      }
+      
+      function goToSlide(index) {
+        if (index >= 0 && index < slides.length) {
+          currentSlide = index;
+          updateCarousel();
+        }
+      }
+      
+      prevBtn.addEventListener('click', () => {
+        if (currentSlide > 0) {
+          goToSlide(currentSlide - 1);
+        }
+      });
+      
+      nextBtn.addEventListener('click', () => {
+        if (currentSlide < slides.length - 1) {
+          goToSlide(currentSlide + 1);
+        }
+      });
+      
+      // Initialize carousel
+      updateCarousel();
+
+      // Current year
+      document.getElementById('y').textContent = new Date().getFullYear();
+    </script>
+  </body>
+  </html>
+
+ 
